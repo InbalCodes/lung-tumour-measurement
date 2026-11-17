@@ -361,13 +361,12 @@ export function App() {
                   </button>
                 ))}
               </span>
-              {tool !== 'outline' && (
-                <span className="group brush">
-                  <span className="muted">Brush {brushMm} mm</span>
-                  <input type="range" min={1} max={15} value={brushMm} onChange={(e) => setBrushMm(Number(e.target.value))} />
-                  <label className="check"><input type="checkbox" checked={ball} onChange={(e) => setBall(e.target.checked)} />3D</label>
-                </span>
-              )}
+              {/* Always laid out, hidden while outlining, so the tool buttons never move under the pointer. */}
+              <span className={`group brush ${tool === 'outline' ? 'hidden' : ''}`}>
+                <span className="muted">Brush {brushMm} mm</span>
+                <input type="range" min={1} max={15} value={brushMm} onChange={(e) => setBrushMm(Number(e.target.value))} />
+                <label className="check"><input type="checkbox" checked={ball} onChange={(e) => setBall(e.target.checked)} />3D</label>
+              </span>
               {WINDOWS.map((w, i) => (
                 <button key={w.name} className={i === windowIndex ? 'active' : ''} onClick={() => setWindowIndex(i)}>{w.name}</button>
               ))}

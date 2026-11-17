@@ -71,3 +71,5 @@ button.link { background: none; border: none; padding: 0; color: var(--accent); 
 .samples { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
 .samples p { margin: 0; }
 a { color: var(--accent); }
+.group.brush.hidden { visibility: hidden; }
+.group.brush .muted { min-width: 82px; }
