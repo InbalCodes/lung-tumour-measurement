@@ -1,0 +1,352 @@
+{
+  "repeat_man": {
+    "volume_pct": {
+      "n": 28,
+      "mean": 1.41,
+      "sd": 13.58,
+      "loa_low": -25.22,
+      "loa_high": 28.03,
+      "median_abs": 6.75,
+      "max_abs": 36.89
+    },
+    "long_axis_pct": {
+      "n": 28,
+      "mean": -1.14,
+      "sd": 9.9,
+      "loa_low": -20.54,
+      "loa_high": 18.26,
+      "median_abs": 4.94,
+      "max_abs": 23.64
+    },
+    "long_axis_mm": {
+      "n": 28,
+      "mean": -0.63,
+      "sd": 4.33,
+      "loa_low": -9.12,
+      "loa_high": 7.85,
+      "median_abs": 2.15,
+      "max_abs": 13.0
+    },
+    "short_axis_mm": {
+      "n": 28,
+      "mean": -0.71,
+      "sd": 3.6,
+      "loa_low": -7.76,
+      "loa_high": 6.34,
+      "median_abs": 1.45,
+      "max_abs": 12.9
+    }
+  },
+  "repeat_man_pairs": [
+    {
+      "patient_id": "RIDER-1129164940",
+      "volume_test": 61133.0,
+      "volume_retest": 54428.0,
+      "volume_pct": -11.6,
+      "long_axis_test": 69.3,
+      "long_axis_retest": 61.2
+    },
+    {
+      "patient_id": "RIDER-1225316081",
+      "volume_test": 602.0,
+      "volume_retest": 562.0,
+      "volume_pct": -6.9,
+      "long_axis_test": 14.3,
+      "long_axis_retest": 14.0
+    },
+    {
+      "patient_id": "RIDER-1286684383",
+      "volume_test": 3536.0,
+      "volume_retest": 4175.0,
+      "volume_pct": 16.6,
+      "long_axis_test": 32.8,
+      "long_axis_retest": 38.8
+    },
+    {
+      "patient_id": "RIDER-1332496276",
+      "volume_test": 26910.0,
+      "volume_retest": 25053.0,
+      "volume_pct": -7.1,
+      "long_axis_test": 51.4,
+      "long_axis_retest": 48.4
+    },
+    {
+      "patient_id": "RIDER-1344011628",
+      "volume_test": 45143.0,
+      "volume_retest": 31082.0,
+      "volume_pct": -36.9,
+      "long_axis_test": 66.5,
+      "long_axis_retest": 64.0
+    },
+    {
+      "patient_id": "RIDER-1346917136",
+      "volume_test": 88051.0,
+      "volume_retest": 88250.0,
+      "volume_pct": 0.2,
+      "long_axis_test": 64.6,
+      "long_axis_retest": 65.8
+    },
+    {
+      "patient_id": "RIDER-1500037140",
+      "volume_test": 8695.0,
+      "volume_retest": 10303.0,
+      "volume_pct": 16.9,
+      "long_axis_test": 30.7,
+      "long_axis_retest": 32.8
+    },
+    {
+      "patient_id": "RIDER-1532432635",
+      "volume_test": 34975.0,
+      "volume_retest": 37176.0,
+      "volume_pct": 6.1,
+      "long_axis_test": 53.6,
+      "long_axis_retest": 52.0
+    },
+    {
+      "patient_id": "RIDER-1760553574",
+      "volume_test": 3908.0,
+      "volume_retest": 3914.0,
+      "volume_pct": 0.2,
+      "long_axis_test": 28.0,
+      "long_axis_retest": 31.3
+    },
+    {
+      "patient_id": "RIDER-1801720707",
+      "volume_test": 256.0,
+      "volume_retest": 293.0,
+      "volume_pct": 13.5,
+      "long_axis_test": 13.0,
+      "long_axis_retest": 13.3
+    },
+    {
+      "patient_id": "RIDER-1825099523",
+      "volume_test": 24051.0,
+      "volume_retest": 24322.0,
+      "volume_pct": 1.1,
+      "long_axis_test": 44.3,
+      "long_axis_retest": 44.9
+    },
+    {
+      "patient_id": "RIDER-1867199702",
+      "volume_test": 1664.0,
+      "volume_retest": 1633.0,
+      "volume_pct": -1.9,
+      "long_axis_test": 17.2,
+      "long_axis_retest": 17.5
+    },
+    {
+      "patient_id": "RIDER-2016615262",
+      "volume_test": 27861.0,
+      "volume_retest": 29336.0,
+      "volume_pct": 5.2,
+      "long_axis_test": 62.8,
+      "long_axis_retest": 49.8
+    },
+    {
+      "patient_id": "RIDER-2073083717",
+      "volume_test": 5852.0,
+      "volume_retest": 5021.0,
+      "volume_pct": -15.3,
+      "long_axis_test": 36.9,
+      "long_axis_retest": 29.1
+    },
+    {
+      "patient_id": "RIDER-2151469008",
+      "volume_test": 39468.0,
+      "volume_retest": 40519.0,
+      "volume_pct": 2.6,
+      "long_axis_test": 45.2,
+      "long_axis_retest": 53.5
+    },
+    {
+      "patient_id": "RIDER-2357766186",
+      "volume_test": 20960.0,
+      "volume_retest": 22703.0,
+      "volume_pct": 8.0,
+      "long_axis_test": 53.6,
+      "long_axis_retest": 58.8
+    },
+    {
+      "patient_id": "RIDER-2539508879",
+      "volume_test": 8897.0,
+      "volume_retest": 9064.0,
+      "volume_pct": 1.9,
+      "long_axis_test": 37.6,
+      "long_axis_retest": 35.9
+    },
+    {
+      "patient_id": "RIDER-2541949645",
+      "volume_test": 1567.0,
+      "volume_retest": 1944.0,
+      "volume_pct": 21.5,
+      "long_axis_test": 19.1,
+      "long_axis_retest": 18.7
+    },
+    {
+      "patient_id": "RIDER-2619750334",
+      "volume_test": 88155.0,
+      "volume_retest": 86371.0,
+      "volume_pct": -2.0,
+      "long_axis_test": 79.9,
+      "long_axis_retest": 77.3
+    },
+    {
+      "patient_id": "RIDER-2655999012",
+      "volume_test": 2729.0,
+      "volume_retest": 2773.0,
+      "volume_pct": 1.6,
+      "long_axis_test": 30.5,
+      "long_axis_retest": 29.1
+    },
+    {
+      "patient_id": "RIDER-2669524182",
+      "volume_test": 22083.0,
+      "volume_retest": 22893.0,
+      "volume_pct": 3.6,
+      "long_axis_test": 39.2,
+      "long_axis_retest": 41.9
+    },
+    {
+      "patient_id": "RIDER-2799584460",
+      "volume_test": 886.0,
+      "volume_retest": 769.0,
+      "volume_pct": -14.1,
+      "long_axis_test": 13.3,
+      "long_axis_retest": 12.9
+    },
+    {
+      "patient_id": "RIDER-3023568408",
+      "volume_test": 5858.0,
+      "volume_retest": 4891.0,
+      "volume_pct": -18.0,
+      "long_axis_test": 28.4,
+      "long_axis_retest": 24.1
+    },
+    {
+      "patient_id": "RIDER-3115188676",
+      "volume_test": 9520.0,
+      "volume_retest": 12748.0,
+      "volume_pct": 29.0,
+      "long_axis_test": 51.0,
+      "long_axis_retest": 49.6
+    },
+    {
+      "patient_id": "RIDER-3152132495",
+      "volume_test": 147016.0,
+      "volume_retest": 146018.0,
+      "volume_pct": -0.7,
+      "long_axis_test": 95.3,
+      "long_axis_retest": 93.1
+    },
+    {
+      "patient_id": "RIDER-3160137230",
+      "volume_test": 6832.0,
+      "volume_retest": 7301.0,
+      "volume_pct": 6.6,
+      "long_axis_test": 27.6,
+      "long_axis_retest": 30.1
+    },
+    {
+      "patient_id": "RIDER-6324870494",
+      "volume_test": 7622.0,
+      "volume_retest": 9393.0,
+      "volume_pct": 20.8,
+      "long_axis_test": 30.1,
+      "long_axis_retest": 31.7
+    },
+    {
+      "patient_id": "RIDER-9763310455",
+      "volume_test": 976.0,
+      "volume_retest": 963.0,
+      "volume_pct": -1.3,
+      "long_axis_test": 17.0,
+      "long_axis_retest": 15.9
+    }
+  ],
+  "repeat_auto": {
+    "volume_pct": {
+      "n": 27,
+      "mean": -1.8,
+      "sd": 18.8,
+      "loa_low": -38.64,
+      "loa_high": 35.04,
+      "median_abs": 11.78,
+      "max_abs": 59.29
+    },
+    "long_axis_pct": {
+      "n": 27,
+      "mean": 0.34,
+      "sd": 13.07,
+      "loa_low": -25.28,
+      "loa_high": 25.96,
+      "median_abs": 7.05,
+      "max_abs": 31.75
+    },
+    "long_axis_mm": {
+      "n": 27,
+      "mean": 0.72,
+      "sd": 5.58,
+      "loa_low": -10.22,
+      "loa_high": 11.66,
+      "median_abs": 2.6,
+      "max_abs": 21.7
+    },
+    "short_axis_mm": {
+      "n": 27,
+      "mean": -1.14,
+      "sd": 4.91,
+      "loa_low": -10.76,
+      "loa_high": 8.48,
+      "median_abs": 2.0,
+      "max_abs": 15.7
+    }
+  },
+  "dataset_auto_vs_manual": {
+    "n": 58,
+    "dice_mean": 0.872,
+    "dice_median": 0.917,
+    "dice_min": 0.416,
+    "volume_diff_pct": {
+      "n": 58,
+      "mean": 14.08,
+      "sd": 30.55,
+      "loa_low": -45.81,
+      "loa_high": 73.96,
+      "median_abs": 5.95,
+      "max_abs": 115.3
+    },
+    "long_axis_diff_mm": {
+      "n": 58,
+      "mean": 1.1,
+      "sd": 6.78,
+      "loa_low": -12.18,
+      "loa_high": 14.38,
+      "median_abs": 2.2,
+      "max_abs": 35.4
+    }
+  },
+  "manual_sizes": {
+    "n_outlines": 59,
+    "n_patients": 31,
+    "long_axis_mm": {
+      "min": 12.9,
+      "median": 37.6,
+      "max": 95.3
+    },
+    "volume_mm3": {
+      "min": 256.0,
+      "median": 9393.0,
+      "max": 147016.0
+    },
+    "long_axis_bins": {
+      "<=10": 0,
+      "10-30": 18,
+      "30-50": 21,
+      ">50": 20
+    }
+  },
+  "split": {
+    "dev_patients": 10,
+    "test_patients": 21
+  }
+}

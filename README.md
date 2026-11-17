@@ -15,8 +15,8 @@ Work in progress. This README is updated as the project moves forward.
 | --- | --- |
 | Data download | Scripted (see below) |
 | Client discovery | In progress |
-| Baseline and evaluation harness | Not started |
-| Tool | Not started |
+| Reference measurements and quality bar | Done (see docs/reference.md) |
+| Tool | First version: viewer, outline from a stroke, measurements, sheet export |
 | Results | Not started |
 
 ## Repository layout
@@ -25,6 +25,8 @@ Work in progress. This README is updated as the project moves forward.
 data/tcia-metadata/   Manifests and metadata published by TCIA (committed)
 data/dicom/           Downloaded scans and segmentations (not committed)
 scripts/              Data download and utility scripts
+app/                  The browser tool (React, TypeScript) and its scoring script
+eval/                 Reference measurements from the expert outlines (Python)
 docs/                 Requirements, decisions and results
 ```
 
@@ -48,7 +50,32 @@ never leave the hospital.
 
 ## Running the tool
 
-To be added once the first version is in place.
+Requires Node.js 22 or later.
+
+```
+cd app
+npm install
+npm run dev
+```
+
+Open the address Vite prints (usually http://localhost:5173), choose "Open scan folder" and pick
+one series folder under `data/dicom/ct`. The scan is read by the browser from the local disk.
+Nothing is uploaded.
+
+- Scroll to move through slices. Drag a line across a tumour to outline and measure it.
+- Review the outline, fill in the sheet fields, and sign off.
+- Export writes the signed-off rows as CSV in the lab's sheet format, plus an edit trail.
+
+`npm run build` produces a static site in `app/dist` that can be hosted anywhere.
+
+## Scoring the tool
+
+The outlining code that runs in the browser is scored in Node against the expert outlines:
+
+```
+python eval/export_crops.py          # once, after the data download
+cd app && npm run evaluate -- --split dev
+```
 
 ## Data attribution
 
