@@ -68,3 +68,6 @@ button.link { background: none; border: none; padding: 0; color: var(--accent); 
 .prior-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); }
 .change { background: #17202b; border-radius: 6px; padding: 6px 8px; margin-bottom: 10px; font-size: 12.5px; }
 .flag { color: var(--warn); margin-top: 4px; }
+.samples { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.samples p { margin: 0; }
+a { color: var(--accent); }

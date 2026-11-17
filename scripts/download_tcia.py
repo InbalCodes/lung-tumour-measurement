@@ -6,6 +6,7 @@ Usage (from the project root):
     python scripts/download_tcia.py                 # segmentations + matching CT scans (~8.5 GB)
     python scripts/download_tcia.py --only seg      # segmentations only (~1 GB), good first test
     python scripts/download_tcia.py --only ct       # matching CT scans only (~7.5 GB)
+    python scripts/download_tcia.py --series <uid> [<uid> ...]   # just these CT series
 
 Output: data/dicom/<seg|ct>/<SeriesInstanceUID>/*.dcm
 Safe to stop and re-run: finished series are skipped.
@@ -60,11 +61,13 @@ def download_series(uid: str, dest: Path, retries: int = 4) -> int:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--only", choices=list(MANIFESTS), help="download just one of the two manifests")
+    parser.add_argument("--series", nargs="+", metavar="UID",
+                        help="download only these CT series (used to fetch the public sample scans)")
     args = parser.parse_args()
 
     failed = []
-    for name in ([args.only] if args.only else list(MANIFESTS)):
-        uids = series_uids(MANIFESTS[name])
+    for name in (["ct"] if args.series else [args.only] if args.only else list(MANIFESTS)):
+        uids = args.series or series_uids(MANIFESTS[name])
         out_dir = ROOT / "data" / "dicom" / name
         out_dir.mkdir(parents=True, exist_ok=True)
         print(f"== {name}: {len(uids)} series -> {out_dir}")

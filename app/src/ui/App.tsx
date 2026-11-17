@@ -15,6 +15,9 @@ import type { Tool } from './Viewer.tsx';
 import { WINDOWS } from './types.ts';
 import type { Finding, PriorSpot } from './types.ts';
 
+/** A public practice scan packed with the site, offered so the tool can be tried without data. */
+interface SampleScan { id: string; label: string; startSlice: number | null; file: string; megabytes: number; volume: Omit<Volume, 'hu'> }
+
 const STORE = 'ltm.sessions';
 const storedSessions = (): Session[] => { try { return JSON.parse(localStorage.getItem(STORE) ?? '[]'); } catch { return []; } };
 
@@ -45,6 +48,7 @@ export function App() {
   const [spots, setSpots] = useState<PriorSpot[]>([]);
   const [offered, setOffered] = useState<Session | null>(null);
   const priorPicker = useRef<HTMLInputElement>(null);
+  const [samples, setSamples] = useState<SampleScan[]>([]);
   const edit = useRef<{ id: number; mask: Mask; before: number; z: number; last: [number, number] | null } | null>(null);
 
   // A folder picker reads files straight from disk; nothing is sent anywhere.
@@ -70,12 +74,67 @@ export function App() {
     })();
   }, []);
 
+  // Sample scans are present only when the site was built with them.
+  useEffect(() => {
+    fetch('samples/index.json').then((r) => (r.ok ? r.json() : [])).then(setSamples).catch(() => setSamples([]));
+  }, []);
+
+  async function openSample(sample: SampleScan) {
+    resetScan();
+    setProgress({ done: 0, total: sample.megabytes });
+    try {
+      const response = await fetch(`samples/${sample.file}`);
+      if (!response.ok || !response.body) throw new Error('The sample scan could not be loaded.');
+      // Count compressed megabytes as they arrive, then unpack in the browser.
+      let received = 0;
+      const counted = response.body.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
+        transform(chunk, controller) {
+          received += chunk.length;
+          setProgress({ done: Math.min(Math.round(received / 1e6), sample.megabytes), total: sample.megabytes });
+          controller.enqueue(chunk);
+        },
+      }));
+      // Some hosts already unpack .gz files on the way; fall back to the raw bytes if so.
+      const packed = await new Response(counted).arrayBuffer();
+      const head = new Uint8Array(packed, 0, 2);
+      const raw = head[0] === 0x1f && head[1] === 0x8b
+        ? await new Response(new Blob([packed]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer()
+        : packed;
+      showVolume({ ...sample.volume, hu: new Int16Array(raw) });
+      const start = sample.startSlice === null ? -1 : sample.volume.sliceNumbers.indexOf(sample.startSlice);
+      if (start >= 0) {
+        setSlice(start);
+        setNotice('The tumour in this sample scan is on this slice. Drag a line across it to outline and measure it.');
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setProgress(null);
+    }
+  }
+
+  function resetScan() {
+    setError(''); setNotice(''); setVolume(null); setFindings([]); setSelectedId(null);
+    setPrior(null); setSpots([]); setOffered(null); setThumb(null);
+  }
+
+  function showVolume(v: Volume) {
+    setVolume(v);
+    setSlice(Math.floor(v.nz / 2));
+    setScan((s) => ({ ...s, timepoint: 'Baseline', patientId: v.meta.patientId, scanDate: formatDicomDate(v.meta.studyDate) }));
+    nextId.current = 1;
+    setStartedAt(Date.now());
+    setThumb(thumbnail(v));
+    // A session saved earlier in this browser for the same patient can serve as the prior scan.
+    const earlier = storedSessions().filter((x) => x.patientId === v.meta.patientId && x.seriesUid !== v.meta.seriesUid);
+    setOffered(earlier.sort((a, b) => b.savedAt.localeCompare(a.savedAt))[0] ?? null);
+  }
+
   const openFiles = (list: FileList | null) =>
     list?.length ? openSources([...list].map((f) => () => f.arrayBuffer())) : Promise.resolve();
 
   async function openSources(files: (() => Promise<ArrayBuffer>)[]) {
-    setError(''); setNotice(''); setVolume(null); setFindings([]); setSelectedId(null);
-    setPrior(null); setSpots([]); setOffered(null); setThumb(null);
+    resetScan();
     setProgress({ done: 0, total: files.length });
     try {
       const slices: ParsedSlice[] = [];
@@ -85,16 +144,7 @@ export function App() {
         for (const b of buffers) { const s = parseSlice(b); if (s) slices.push(s); }
         setProgress({ done: Math.min(i + batch, files.length), total: files.length });
       }
-      const v = buildVolume(slices);
-      setVolume(v);
-      setSlice(Math.floor(v.nz / 2));
-      setScan((s) => ({ ...s, patientId: v.meta.patientId, scanDate: formatDicomDate(v.meta.studyDate) }));
-      nextId.current = 1;
-      setStartedAt(Date.now());
-      setThumb(thumbnail(v));
-      // A session saved earlier in this browser for the same patient can serve as the prior scan.
-      const earlier = storedSessions().filter((x) => x.patientId === v.meta.patientId && x.seriesUid !== v.meta.seriesUid);
-      setOffered(earlier.sort((a, b) => b.savedAt.localeCompare(a.savedAt))[0] ?? null);
+      showVolume(buildVolume(slices));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -267,6 +317,9 @@ export function App() {
         <span className="muted">Scans are read on this computer. Nothing is uploaded.</span>
         <div className="spacer" />
         {volume && <span className="muted">Minutes on scan: <b>{minutes}</b></span>}
+        {volume && samples.map((sm) => (
+          <button key={sm.id} onClick={() => void openSample(sm)}>{sm.label.replace(/ \(.*/, '')}</button>
+        ))}
         <button onClick={() => picker.current?.click()}>{volume ? 'Open another scan' : 'Open scan folder'}</button>
         <input ref={picker} type="file" multiple hidden onChange={(e) => { void openFiles(e.target.files); e.target.value = ''; }} />
       </header>
@@ -276,7 +329,19 @@ export function App() {
           <h1>Open a CT scan to start</h1>
           <p>Choose the folder that holds the DICOM files of one CT series.</p>
           <button className="primary" onClick={() => picker.current?.click()}>Open scan folder</button>
-          {progress && <p className="muted">Reading files: {progress.done} of {progress.total}</p>}
+          {samples.length > 0 && (
+            <div className="samples">
+              <p className="muted">No scan at hand? Try a public practice scan:</p>
+              {samples.map((sm) => (
+                <button key={sm.id} onClick={() => void openSample(sm)}>{sm.label} · {sm.megabytes} MB</button>
+              ))}
+              <p className="muted small">
+                Measure and export scan 1, then open scan 2: the tool carries the tumour over.
+                Sample scans: RIDER Lung CT, The Cancer Imaging Archive, <a href="https://doi.org/10.7937/k9/tcia.2015.u1x8a5nr" target="_blank" rel="noreferrer">doi:10.7937/k9/tcia.2015.u1x8a5nr</a> (CC BY).
+              </p>
+            </div>
+          )}
+          {progress && <p className="muted">Loading: {progress.done} of {progress.total}</p>}
           {error && <p className="error">{error}</p>}
           <p className="muted small">This tool supports research measurements only. It is not a medical device and must not be used for diagnosis or treatment decisions.</p>
         </main>
