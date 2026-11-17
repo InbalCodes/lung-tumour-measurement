@@ -1,0 +1,4 @@
+node_modules/
+weights/
+emb/
+package-lock.json
