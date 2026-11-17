@@ -7,6 +7,8 @@ reducing the quality of their measurements.
 > **Research use only.** This tool is not a medical device and makes no clinical claims. It must
 > not be used for diagnosis or treatment decisions.
 
+**Live tool:** https://inbalcodes.github.io/lung-tumour-measurement/ (runs entirely in the browser; scans never leave the machine)
+
 ## Status
 
 Work in progress. This README is updated as the project moves forward.
@@ -14,10 +16,11 @@ Work in progress. This README is updated as the project moves forward.
 | Stage | State |
 | --- | --- |
 | Data download | Scripted (see below) |
-| Client discovery | In progress |
+| Client discovery | Done, scope agreed with the lab |
 | Reference measurements and quality bar | Done (see docs/reference.md) |
-| Tool | First version: viewer, outline from a stroke, measurements, sheet export |
-| Results | Not started |
+| Tool | Viewer, outline from a stroke, correction, sign-off, sheet export, follow-up against a prior scan |
+| Known failures | Development scans (see docs/failures.md) |
+| Results | Test set not run yet |
 
 ## Repository layout
 
