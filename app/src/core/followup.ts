@@ -1,4 +1,5 @@
 import type { Measurement } from './measure.ts';
+import type { Stroke } from './segment.ts';
 import type { Mask, Volume } from './volume.ts';
 
 /** Position in patient space, mm: x (left-right), y (front-back), z (along the body). */
@@ -190,6 +191,9 @@ export interface SessionNodule {
   shortAxisMm: number;
   volumeMm3: number;
   sliceNumber: number;
+  /** The stroke that produced the outline (patient space) and the density threshold it used. */
+  strokeMm: { a: PointMm; b: PointMm };
+  thresholdHu: number;
 }
 
 export interface Session {
@@ -217,7 +221,8 @@ export function fromBase64(text: string): Uint8Array {
   return out;
 }
 
-export function sessionNodule(v: Volume, mask: Mask, m: Measurement, fields: { noduleId: string; lobe: string; type: string }): SessionNodule {
+export function sessionNodule(v: Volume, mask: Mask, m: Measurement, fields: { noduleId: string; lobe: string; type: string },
+  stroke: Stroke, thresholdHu: number): SessionNodule {
   const centroid = maskCentroidMm(mask, v);
   const patch = patchAround(v, centroid, 20);
   return {
@@ -225,6 +230,8 @@ export function sessionNodule(v: Volume, mask: Mask, m: Measurement, fields: { n
     patch: { size: patch.size, spacing: patch.spacing, data: toBase64(patch.data) },
     longAxisMm: m.longAxisMm, shortAxisMm: m.shortAxisMm, volumeMm3: Math.round(m.volumeMm3),
     sliceNumber: m.sliceIndex >= 0 ? v.sliceNumbers[m.sliceIndex] : 0,
+    strokeMm: { a: voxelToMm(v, stroke.z, stroke.y0, stroke.x0), b: voxelToMm(v, stroke.z, stroke.y1, stroke.x1) },
+    thresholdHu,
   };
 }
 
@@ -233,6 +240,14 @@ export function parseSession(text: string): Session {
   if (s?.format !== 'lung-tumour-measurement/session' || !Array.isArray(s.nodules) || !s.thumb)
     throw new Error('This file is not a saved session from this tool.');
   return s as Session;
+}
+
+/** The prior scan's stroke, moved to where the tumour now is on the open scan. */
+export function carriedStroke(v: Volume, nodule: SessionNodule, at: PointMm): Stroke {
+  const d = [at[0] - nodule.centroidMm[0], at[1] - nodule.centroidMm[1], at[2] - nodule.centroidMm[2]];
+  const a = mmToVoxel(v, [nodule.strokeMm.a[0] + d[0], nodule.strokeMm.a[1] + d[1], nodule.strokeMm.a[2] + d[2]]);
+  const b = mmToVoxel(v, [nodule.strokeMm.b[0] + d[0], nodule.strokeMm.b[1] + d[1], nodule.strokeMm.b[2] + d[2]]);
+  return { z: a[0], x0: a[2], y0: a[1], x1: b[2], y1: b[1] };
 }
 
 /** "Baseline" -> "Follow-up 1", "Follow-up 2" -> "Follow-up 3". */

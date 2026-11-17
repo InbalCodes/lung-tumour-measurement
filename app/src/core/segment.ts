@@ -31,13 +31,18 @@ export interface SegmentParams {
    * side is used, so a tumour lying against the chest wall does not pull the wall in.
    */
   fitWidth: boolean;
+  /**
+   * Use this density threshold instead of estimating one. On a follow-up scan the prior scan's
+   * threshold is reused, so the same tumour is cut at the same density both times.
+   */
+  fixedThresholdHu: number | null;
   /** Search depth along z: 0 = as deep as the fitted width, 1 = as deep as the stroke is long. */
   zMix: number;
 }
 
 export const DEFAULT_PARAMS: SegmentParams = {
   boundScale: 1.0, zScale: 1.0, padMm: 2, openMm: 1, openFrac: 0.12,
-  thresholdFrac: 0.5, minThresholdHu: -750, maxThresholdHu: -200, upperHu: 300, smooth: true, fitWidth: true, zMix: 1,
+  thresholdFrac: 0.5, minThresholdHu: -750, maxThresholdHu: -200, upperHu: 300, smooth: true, fitWidth: true, zMix: 1, fixedThresholdHu: null,
 };
 
 export interface SegmentResult {
@@ -121,6 +126,7 @@ export function segmentFromStroke(v: Volume, s: Stroke, p: SegmentParams = DEFAU
   const backgroundHu = around[Math.floor(around.length * 0.1)] ?? -850;
   let thresholdHu = backgroundHu + p.thresholdFrac * (tumourHu - backgroundHu);
   thresholdHu = Math.min(Math.max(thresholdHu, p.minThresholdHu), p.maxThresholdHu);
+  if (p.fixedThresholdHu !== null) thresholdHu = p.fixedThresholdHu;
 
   // Shape of the search region: an ellipsoid whose long axis is the stroke.
   const ux = (s.x1 - s.x0) * v.dx / lenMm, uy = (s.y1 - s.y0) * v.dy / lenMm;

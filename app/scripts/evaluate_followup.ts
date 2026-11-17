@@ -14,7 +14,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildVolume, parseSlice } from '../src/core/dicom.ts';
 import type { ParsedSlice } from '../src/core/dicom.ts';
-import { alignScans, distanceMm, patchAround, refinePosition, thumbnail, voxelToMm } from '../src/core/followup.ts';
+import { alignScans, carriedStroke, distanceMm, patchAround, refinePosition, sessionNodule, thumbnail, voxelToMm } from '../src/core/followup.ts';
+import { measure } from '../src/core/measure.ts';
+import { DEFAULT_PARAMS, segmentFromStroke } from '../src/core/segment.ts';
+import type { Mask } from '../src/core/volume.ts';
 import type { PointMm } from '../src/core/followup.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -41,7 +44,15 @@ function loadScan(r: Record<string, string>) {
     if (s) slices.push(s);
   }
   const v = buildVolume(slices);
-  return { v, centre: voxelToMm(v, Number(r.centroid_z), Number(r.centroid_row), Number(r.centroid_col)) };
+  // Expert mask, placed in the full scan from its crop, to simulate the researcher's stroke.
+  const meta = JSON.parse(readFileSync(join(root, 'data', 'derived', 'crops', `${r.case}.json`), 'utf8'));
+  const [nz, ny, nx] = meta.shape, [z0, y0, x0] = meta.offset;
+  const ref: Mask = { data: new Uint8Array(readFileSync(join(root, 'data', 'derived', 'crops', `${r.case}.u8`))), z0, y0, x0, nz, ny, nx };
+  const m = measure(ref, v), a = m.longAxis!;
+  return {
+    v, refVolume: m.volumeMm3, stroke: { z: m.sliceIndex, x0: a.x0, y0: a.y0, x1: a.x1, y1: a.y1 },
+    centre: voxelToMm(v, Number(r.centroid_z), Number(r.centroid_row), Number(r.centroid_col)),
+  };
 }
 
 const out: any[] = [];
@@ -60,7 +71,25 @@ for (const p of patients) {
   const expected: PointMm = [A.centre[0] + shift[0], A.centre[1] + shift[1], A.centre[2] + shift[2]];
   const refined = refinePosition(B.v, patchAround(A.v, A.centre, 20), expected);
   const t2 = performance.now();
+  // Volumes three ways: the expert's, the tool with an independent stroke on each scan, and the
+  // tool carrying the first scan's stroke and threshold over to the second scan.
+  const first = segmentFromStroke(A.v, A.stroke);
+  const independent = segmentFromStroke(B.v, B.stroke);
+  let carriedVol: number | null = null;
+  if (first) {
+    const mA = measure(first.mask, A.v);
+    const nodule = sessionNodule(A.v, first.mask, mA, { noduleId: 'N1', lobe: '', type: 'Solid' }, A.stroke, first.thresholdHu);
+    const at = refinePosition(B.v, patchAround(A.v, nodule.centroidMm, 20),
+      [nodule.centroidMm[0] + shift[0], nodule.centroidMm[1] + shift[1], nodule.centroidMm[2] + shift[2]]);
+    const again = segmentFromStroke(B.v, carriedStroke(B.v, nodule, at), { ...DEFAULT_PARAMS, fixedThresholdHu: first.thresholdHu });
+    if (again) carriedVol = measure(again.mask, B.v).volumeMm3;
+  }
+  const pct = (a: number, b: number) => 100 * (b - a) / ((a + b) / 2);
+  const volA = first ? measure(first.mask, A.v).volumeMm3 : null;
   const res = {
+    expertPct: pct(A.refVolume, B.refVolume),
+    independentPct: volA && independent ? pct(volA, measure(independent.mask, B.v).volumeMm3) : null,
+    carriedPct: volA && carriedVol ? pct(volA, carriedVol) : null,
     patient: p, longAxis: Number(a.long_axis_mm),
     unaligned: distanceMm(A.centre, B.centre), aligned: distanceMm(expected, B.centre),
     refined: distanceMm(refined, B.centre), dz: Math.abs(refined[2] - B.centre[2]),
@@ -70,6 +99,8 @@ for (const p of patients) {
   out.push(res);
 }
 const med = (a: number[]) => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+const show = (x: number | null) => (x === null ? '   n/a' : x.toFixed(1).padStart(6));
+for (const o of out) console.log(`${o.patient}  volume change between same-day scans: expert ${show(o.expertPct)}% | tool, new stroke ${show(o.independentPct)}% | tool, carried over ${show(o.carriedPct)}%`);
 for (const o of out) console.log(`${o.patient}  tumour ${String(o.longAxis).padStart(5)} mm | same coordinates ${o.unaligned.toFixed(1).padStart(5)} | scans aligned ${o.aligned.toFixed(1).padStart(5)} | refined ${o.refined.toFixed(1).padStart(5)} (z ${o.dz.toFixed(1)}) | shift ${o.shift.join(',')} | ${o.alignMs}+${o.refineMs} ms`);
 if (out.length) console.log(JSON.stringify({
   split, pairs: out.length, pending,
@@ -78,5 +109,11 @@ if (out.length) console.log(JSON.stringify({
   refinedMedianMm: +med(out.map((o) => o.refined)).toFixed(1), refinedMaxMm: +Math.max(...out.map((o) => o.refined)).toFixed(1),
   refinedWithin10mm: out.filter((o) => o.refined <= 10).length,
   refinedWithinTumourRadius: out.filter((o) => o.refined <= Math.max(10, o.longAxis / 2)).length,
+  repeatAbsPctMedian: {
+    expert: +med(out.map((o) => Math.abs(o.expertPct))).toFixed(1),
+    toolNewStroke: +med(out.filter((o) => o.independentPct !== null).map((o) => Math.abs(o.independentPct))).toFixed(1),
+    toolCarriedOver: +med(out.filter((o) => o.carriedPct !== null).map((o) => Math.abs(o.carriedPct))).toFixed(1),
+    carriedFailed: out.filter((o) => o.carriedPct === null).length,
+  },
 }));
 else console.log(`nothing finished yet, ${pending} pairs pending`);

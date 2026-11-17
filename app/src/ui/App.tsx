@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildVolume, parseSlice } from '../core/dicom.ts';
 import type { ParsedSlice } from '../core/dicom.ts';
 import { measure } from '../core/measure.ts';
-import { segmentFromStroke } from '../core/segment.ts';
+import { DEFAULT_PARAMS, segmentFromStroke } from '../core/segment.ts';
 import type { Stroke } from '../core/segment.ts';
-import { alignScans, fromBase64, maskCentroidMm, matchPrior, mmToVoxel, nextTimepoint, parseSession, refinePosition, sessionNodule, thumbnail, toBase64 } from '../core/followup.ts';
+import { alignScans, carriedStroke, fromBase64, maskCentroidMm, matchPrior, mmToVoxel, nextTimepoint, parseSession, refinePosition, sessionNodule, thumbnail, toBase64 } from '../core/followup.ts';
 import type { Session, Thumb } from '../core/followup.ts';
 import { LOBES, MATCHES, TYPES, formatDicomDate, notFoundRow, sheetRow, toCsv } from '../core/sheet.ts';
 import type { FindingFields, ScanFields } from '../core/sheet.ts';
@@ -113,10 +113,28 @@ export function App() {
       const [z, y, x] = mmToVoxel(volume, at);
       return { nodule, at, z, y, x, notFound: false };
     });
+    // Propose an outline at each expected position by repeating the prior scan's stroke with the
+    // prior scan's density threshold, so both timepoints are cut the same way.
+    const carried: Finding[] = [];
+    for (const sp of found) {
+      if (!sp.nodule.strokeMm) continue; // session saved by an earlier version: positions only
+      const stroke = carriedStroke(volume, sp.nodule, sp.at);
+      const result = segmentFromStroke(volume, stroke, { ...DEFAULT_PARAMS, fixedThresholdHu: sp.nodule.thresholdHu });
+      if (!result) continue;
+      const id = nextId.current++;
+      carried.push({
+        id, mask: result.mask, measurement: measure(result.mask, volume), signedOff: false, stroke, thresholdHu: result.thresholdHu,
+        prior: sp.nodule,
+        fields: { noduleId: sp.nodule.noduleId, lobe: sp.nodule.lobe, type: sp.nodule.type, solidComponentMm: '', matchToPrior: 'Confident', notes: '' },
+        trail: [{ at: now(), event: `Tool carried ${sp.nodule.noduleId} over from the prior scan (${session.timepoint}, ${session.scanDate}) and suggested an outline with the same stroke and threshold (${Math.round(result.thresholdHu)} HU).` }],
+      });
+    }
+    setFindings((all) => [...all, ...carried]);
     setPrior(session); setSpots(found); setOffered(null);
     setScan((s) => ({ ...s, timepoint: nextTimepoint(session.timepoint) }));
     if (found[0]) setSlice(found[0].z);
-    setNotice(`Prior scan loaded (${session.timepoint}, ${session.scanDate}). ${found.length} expected position${found.length === 1 ? '' : 's'} found in ${Math.round(performance.now() - t0)} ms.`);
+    if (carried[0]) setSelectedId(carried[0].id);
+    setNotice(`Prior scan loaded (${session.timepoint}, ${session.scanDate}). ${carried.length} of ${found.length} tumour${found.length === 1 ? '' : 's'} carried over in ${Math.round(performance.now() - t0)} ms. Review each outline before signing off.`);
   }
 
   async function openPriorFile(list: FileList | null) {
@@ -131,7 +149,7 @@ export function App() {
       format: 'lung-tumour-measurement/session', version: 1, savedAt: now(),
       patientId: scan.patientId, scanDate: scan.scanDate, timepoint: scan.timepoint, seriesUid: volume.meta.seriesUid,
       thumb: { ...thumb, data: toBase64(thumb.data) },
-      nodules: findings.filter((f) => f.signedOff).map((f) => sessionNodule(volume, f.mask, f.measurement, f.fields)),
+      nodules: findings.filter((f) => f.signedOff).map((f) => sessionNodule(volume, f.mask, f.measurement, f.fields, f.stroke, f.thresholdHu)),
     };
   }
 
@@ -368,6 +386,9 @@ export function App() {
                     Since prior: volume <b>{signedPct(f.measurement.volumeMm3, f.prior.volumeMm3)}</b>
                     <span className="muted"> ({f.prior.volumeMm3.toLocaleString()} → {Math.round(f.measurement.volumeMm3).toLocaleString()} mm³)</span>,
                     long axis <b>{signedMm(f.measurement.longAxisMm - f.prior.longAxisMm)}</b>
+                    {Math.abs(f.measurement.volumeMm3 - f.prior.volumeMm3) / f.prior.volumeMm3 > 0.25 && (
+                      <div className="flag">Large change. This is more than repeat measurements of an unchanged tumour usually differ, so check the outline closely before signing off.</div>
+                    )}
                   </div>
                 )}
                 <div className="grid2">
