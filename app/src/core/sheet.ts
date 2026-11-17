@@ -44,6 +44,14 @@ export function sheetRow(v: Volume, scan: ScanFields, f: FindingFields, m: Measu
   ];
 }
 
+/** Row for a nodule of the prior scan that the researcher could not find on this scan. */
+export function notFoundRow(v: Volume, scan: ScanFields, prior: { noduleId: string; lobe: string; type: string }, minutes: number): string[] {
+  return [
+    scan.patientId, scan.scanDate, scan.timepoint, String(v.meta.seriesNumber), String(v.meta.sliceThickness),
+    prior.noduleId, prior.lobe, '', prior.type, '', '', '', '', '', 'Not found', String(minutes), scan.measuredBy, '',
+  ];
+}
+
 const quote = (cell: string) => (/[",\n]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell);
 
 export function toCsv(rows: string[][]): string {

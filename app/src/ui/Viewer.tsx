@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { Stroke } from '../core/segment.ts';
 import type { Volume } from '../core/volume.ts';
-import type { Finding, WindowPreset } from './types.ts';
+import type { Finding, PriorSpot, WindowPreset } from './types.ts';
 
 interface Props {
   volume: Volume;
@@ -9,6 +9,8 @@ interface Props {
   window: WindowPreset;
   findings: Finding[];
   selectedId: number | null;
+  /** Expected positions of the prior scan's nodules, drawn as dashed circles. */
+  spots: PriorSpot[];
   /** +1 or -1: which way the slice index moves when scrolling down. */
   scrollStep: number;
   /** outline: drag a line across a tumour. brush / erase: correct the selected outline. */
@@ -30,14 +32,14 @@ type Drag =
 const COLOURS = { suggested: '#fbbf24', signed: '#34d399', selected: '#38bdf8' };
 
 /** Axial slice viewer: scroll to change slice, drag across a tumour to outline it. */
-export function Viewer({ volume, slice, window: win, findings, selectedId, scrollStep, tool, brushMm, onSlice, onStroke, onBrush }: Props) {
+export function Viewer({ volume, slice, window: win, findings, selectedId, spots, scrollStep, tool, brushMm, onSlice, onStroke, onBrush }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const view = useRef<View>({ scale: 1, ox: 0, oy: 0 });
   const drag = useRef<Drag | null>(null);
   const sliceImage = useRef<{ key: string; canvas: HTMLCanvasElement } | null>(null);
   const hover = useRef<{ x: number; y: number } | null>(null);
-  const latest = useRef({ volume, slice, win, findings, selectedId, scrollStep, tool, brushMm, onSlice, onStroke, onBrush });
-  latest.current = { volume, slice, win, findings, selectedId, scrollStep, tool, brushMm, onSlice, onStroke, onBrush };
+  const latest = useRef({ volume, slice, win, findings, selectedId, spots, scrollStep, tool, brushMm, onSlice, onStroke, onBrush });
+  latest.current = { volume, slice, win, findings, selectedId, spots, scrollStep, tool, brushMm, onSlice, onStroke, onBrush };
 
   const fit = () => {
     const c = canvasRef.current!;
@@ -128,6 +130,23 @@ export function Viewer({ volume, slice, window: win, findings, selectedId, scrol
       ctx.fillStyle = colour;
       ctx.font = '600 12px system-ui, sans-serif';
       ctx.fillText(f.fields.noduleId, lx + 4, ly + 4);
+    }
+
+    // Where each nodule of the prior scan is expected, shown on the slices its old size spans.
+    for (const sp of latest.current.spots) {
+      const radius = Math.max(sp.nodule.longAxisMm / 2, 5);
+      const off = Math.abs(z - sp.z) * v.dz;
+      if (off > radius || sp.notFound) continue;
+      const [sx, sy] = toScreen(sp.x, sp.y);
+      const r = Math.sqrt(radius * radius - off * off) * scale + 4;
+      ctx.strokeStyle = '#e879f9';
+      ctx.lineWidth = z === sp.z ? 2 : 1;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#e879f9';
+      ctx.font = '600 12px system-ui, sans-serif';
+      ctx.fillText(`${sp.nodule.noduleId} prior`, sx + r + 4, sy + r);
     }
 
     const d = drag.current;

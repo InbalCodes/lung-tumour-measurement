@@ -13,6 +13,9 @@ export interface Volume {
   dx: number;
   /** DICOM InstanceNumber of each slice, the number a researcher sees in a viewer. */
   sliceNumbers: number[];
+  /** Patient-space position (mm) of the first pixel centre, and of every slice along z. */
+  origin: [number, number];
+  zPositions: number[];
   meta: ScanMeta;
 }
 

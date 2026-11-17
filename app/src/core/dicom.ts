@@ -6,6 +6,8 @@ export interface ParsedSlice {
   seriesUid: string;
   rows: number;
   cols: number;
+  x: number;
+  y: number;
   z: number;
   dy: number;
   dx: number;
@@ -48,6 +50,8 @@ export function parseSlice(buffer: ArrayBuffer): ParsedSlice | null {
   return {
     seriesUid: ds.string('x0020000e') ?? '',
     rows, cols,
+    x: ds.floatString('x00200032', 0) ?? 0,
+    y: ds.floatString('x00200032', 1) ?? 0,
     z: ds.floatString('x00200032', 2) ?? 0,
     dy: ds.floatString('x00280030', 0) ?? 1,
     dx: ds.floatString('x00280030', 1) ?? 1,
@@ -77,5 +81,7 @@ export function buildVolume(slices: ParsedSlice[]): Volume {
   const dz = gaps[Math.floor(gaps.length / 2)] || meta.sliceThickness || 1;
   const hu = new Int16Array(usable.length * rows * cols);
   usable.forEach((s, i) => hu.set(s.hu, i * rows * cols));
-  return { hu, nz: usable.length, ny: rows, nx: cols, dz, dy, dx, sliceNumbers: usable.map((s) => s.instanceNumber), meta };
+  return { hu, nz: usable.length, ny: rows, nx: cols, dz, dy, dx, sliceNumbers: usable.map((s) => s.instanceNumber),
+    origin: [usable[0].x, usable[0].y], zPositions: usable.map((s) => s.z), meta,
+  };
 }

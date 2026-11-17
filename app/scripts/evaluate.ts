@@ -38,7 +38,7 @@ function loadCase(name: string) {
   const hu = new Int16Array(raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength));
   const volume: Volume = {
     hu, nz, ny, nx, dz: meta.spacing[0], dy: meta.spacing[1], dx: meta.spacing[2],
-    sliceNumbers: meta.instance_numbers,
+    sliceNumbers: meta.instance_numbers, origin: [0, 0], zPositions: meta.instance_numbers.map((_: number, i: number) => i * meta.spacing[0]),
     meta: { patientId: meta.patient_id, studyDate: '', seriesNumber: 0, sliceThickness: meta.spacing[0], seriesUid: '', seriesDescription: '' },
   };
   const ref: Mask = { data: new Uint8Array(readFileSync(join(crops, `${name}.u8`))), z0: 0, y0: 0, x0: 0, nz, ny, nx };

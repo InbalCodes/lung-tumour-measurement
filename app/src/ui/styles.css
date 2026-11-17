@@ -62,3 +62,8 @@ label { display: flex; flex-direction: column; gap: 3px; color: var(--muted); fo
 label.check { flex-direction: row; align-items: center; gap: 4px; color: var(--text); }
 label.check input { width: auto; }
 .viewer-canvas.brushing { cursor: none; }
+.card.offer { border-color: #e879f9; }
+.card.offer p { margin: 0 0 8px; }
+button.link { background: none; border: none; padding: 0; color: var(--accent); text-decoration: underline; }
+.prior-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.change { background: #17202b; border-radius: 6px; padding: 6px 8px; margin-bottom: 10px; font-size: 12.5px; }

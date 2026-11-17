@@ -4,16 +4,23 @@ import type { ParsedSlice } from '../core/dicom.ts';
 import { measure } from '../core/measure.ts';
 import { segmentFromStroke } from '../core/segment.ts';
 import type { Stroke } from '../core/segment.ts';
-import { LOBES, MATCHES, TYPES, formatDicomDate, sheetRow, toCsv } from '../core/sheet.ts';
+import { alignScans, fromBase64, maskCentroidMm, matchPrior, mmToVoxel, nextTimepoint, parseSession, refinePosition, sessionNodule, thumbnail, toBase64 } from '../core/followup.ts';
+import type { Session, Thumb } from '../core/followup.ts';
+import { LOBES, MATCHES, TYPES, formatDicomDate, notFoundRow, sheetRow, toCsv } from '../core/sheet.ts';
 import type { FindingFields, ScanFields } from '../core/sheet.ts';
 import type { Mask, Volume } from '../core/volume.ts';
 import { cloneMask, cropMask, maskVoxelCount, paintLine } from '../core/volume.ts';
 import { Viewer } from './Viewer.tsx';
 import type { Tool } from './Viewer.tsx';
 import { WINDOWS } from './types.ts';
-import type { Finding } from './types.ts';
+import type { Finding, PriorSpot } from './types.ts';
+
+const STORE = 'ltm.sessions';
+const storedSessions = (): Session[] => { try { return JSON.parse(localStorage.getItem(STORE) ?? '[]'); } catch { return []; } };
 
 const now = () => new Date().toISOString();
+const signedPct = (value: number, before: number) => { const p = before ? (100 * (value - before)) / before : 0; return `${p >= 0 ? '+' : ''}${p.toFixed(1)}%`; };
+const signedMm = (d: number) => `${d >= 0 ? '+' : ''}${d.toFixed(1)} mm`;
 
 export function App() {
   const [volume, setVolume] = useState<Volume | null>(null);
@@ -33,6 +40,11 @@ export function App() {
   const [tool, setTool] = useState<Tool>('outline');
   const [brushMm, setBrushMm] = useState(3);
   const [ball, setBall] = useState(false);
+  const [thumb, setThumb] = useState<Thumb | null>(null);
+  const [prior, setPrior] = useState<Session | null>(null);
+  const [spots, setSpots] = useState<PriorSpot[]>([]);
+  const [offered, setOffered] = useState<Session | null>(null);
+  const priorPicker = useRef<HTMLInputElement>(null);
   const edit = useRef<{ id: number; mask: Mask; before: number; z: number; last: [number, number] | null } | null>(null);
 
   // A folder picker reads files straight from disk; nothing is sent anywhere.
@@ -63,6 +75,7 @@ export function App() {
 
   async function openSources(files: (() => Promise<ArrayBuffer>)[]) {
     setError(''); setNotice(''); setVolume(null); setFindings([]); setSelectedId(null);
+    setPrior(null); setSpots([]); setOffered(null); setThumb(null);
     setProgress({ done: 0, total: files.length });
     try {
       const slices: ParsedSlice[] = [];
@@ -78,11 +91,56 @@ export function App() {
       setScan((s) => ({ ...s, patientId: v.meta.patientId, scanDate: formatDicomDate(v.meta.studyDate) }));
       nextId.current = 1;
       setStartedAt(Date.now());
+      setThumb(thumbnail(v));
+      // A session saved earlier in this browser for the same patient can serve as the prior scan.
+      const earlier = storedSessions().filter((x) => x.patientId === v.meta.patientId && x.seriesUid !== v.meta.seriesUid);
+      setOffered(earlier.sort((a, b) => b.savedAt.localeCompare(a.savedAt))[0] ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setProgress(null);
     }
+  }
+
+  /** Use a saved session as the prior scan: line the scans up and find where each nodule should be. */
+  function usePrior(session: Session) {
+    if (!volume || !thumb) return;
+    const t0 = performance.now();
+    const shift = alignScans({ ...session.thumb, data: fromBase64(session.thumb.data) }, thumb);
+    const found: PriorSpot[] = session.nodules.map((nodule) => {
+      const expected: [number, number, number] = [nodule.centroidMm[0] + shift[0], nodule.centroidMm[1] + shift[1], nodule.centroidMm[2] + shift[2]];
+      const at = refinePosition(volume, { ...nodule.patch, data: fromBase64(nodule.patch.data) }, expected);
+      const [z, y, x] = mmToVoxel(volume, at);
+      return { nodule, at, z, y, x, notFound: false };
+    });
+    setPrior(session); setSpots(found); setOffered(null);
+    setScan((s) => ({ ...s, timepoint: nextTimepoint(session.timepoint) }));
+    if (found[0]) setSlice(found[0].z);
+    setNotice(`Prior scan loaded (${session.timepoint}, ${session.scanDate}). ${found.length} expected position${found.length === 1 ? '' : 's'} found in ${Math.round(performance.now() - t0)} ms.`);
+  }
+
+  async function openPriorFile(list: FileList | null) {
+    if (!list?.[0]) return;
+    try { usePrior(parseSession(await list[0].text())); }
+    catch (e) { setNotice(e instanceof Error ? e.message : String(e)); }
+  }
+
+  function buildSession(): Session | null {
+    if (!volume || !thumb) return null;
+    return {
+      format: 'lung-tumour-measurement/session', version: 1, savedAt: now(),
+      patientId: scan.patientId, scanDate: scan.scanDate, timepoint: scan.timepoint, seriesUid: volume.meta.seriesUid,
+      thumb: { ...thumb, data: toBase64(thumb.data) },
+      nodules: findings.filter((f) => f.signedOff).map((f) => sessionNodule(volume, f.mask, f.measurement, f.fields)),
+    };
+  }
+
+  /** Keep the session in this browser so the patient's next scan can start from it. */
+  function rememberSession(session: Session) {
+    try {
+      const others = storedSessions().filter((x) => x.seriesUid !== session.seriesUid);
+      localStorage.setItem(STORE, JSON.stringify([...others, session].slice(-20)));
+    } catch { /* storage full or unavailable: the downloaded file is the durable copy */ }
   }
 
   function addFinding(stroke: Stroke) {
@@ -96,10 +154,23 @@ export function App() {
     setNotice('');
     const id = nextId.current++;
     const fields: FindingFields = { noduleId: `N${id}`, lobe: '', type: 'Solid', solidComponentMm: '', matchToPrior: '', notes: '' };
+    const trail = [{ at: now(), event: `Tool suggested an outline from a ${result.strokeMm.toFixed(1)} mm stroke on slice ${volume.sliceNumbers[stroke.z]} (threshold ${Math.round(result.thresholdHu)} HU, ${Math.round(performance.now() - t0)} ms).` }];
+    // On a follow-up scan, pair the outline with the nearest unmatched nodule of the prior scan.
+    const taken = new Set(findings.map((f) => f.prior?.noduleId).filter((x): x is string => !!x));
+    const match = matchPrior(maskCentroidMm(result.mask, volume), spots.filter((sp) => !sp.notFound), taken);
+    if (match) {
+      Object.assign(fields, { noduleId: match.nodule.noduleId, lobe: match.nodule.lobe, type: match.nodule.type, matchToPrior: match.confidence });
+      trail.push({ at: now(), event: `Tool matched it to ${match.nodule.noduleId} of the prior scan (${match.distanceMm.toFixed(1)} mm from the expected position, ${match.confidence.toLowerCase()}).` });
+    } else if (prior) {
+      // New on this scan: give it an id the prior scan did not use.
+      const used = new Set([...prior.nodules.map((n) => n.noduleId), ...findings.map((f) => f.fields.noduleId)]);
+      let k = 1;
+      while (used.has(`N${k}`)) k++;
+      fields.noduleId = `N${k}`;
+    }
     const finding: Finding = {
       id, mask: result.mask, measurement: measure(result.mask, volume), fields, signedOff: false, stroke,
-      thresholdHu: result.thresholdHu,
-      trail: [{ at: now(), event: `Tool suggested an outline from a ${result.strokeMm.toFixed(1)} mm stroke on slice ${volume.sliceNumbers[stroke.z]} (threshold ${Math.round(result.thresholdHu)} HU, ${Math.round(performance.now() - t0)} ms).` }],
+      thresholdHu: result.thresholdHu, prior: match?.nodule, trail,
     };
     setFindings((f) => [...f, finding]);
     setSelectedId(id);
@@ -156,8 +227,16 @@ export function App() {
   }
   function exportSheet() {
     if (!volume) return;
-    const rows = signed.map((f) => sheetRow(volume, scan, f.fields, f.measurement, minutes));
+    const rows = [
+      ...signed.map((f) => sheetRow(volume, scan, f.fields, f.measurement, minutes)),
+      ...spots.filter((sp) => sp.notFound).map((sp) => notFoundRow(volume, scan, sp.nodule, minutes)),
+    ];
     const stem = `${scan.patientId || 'scan'}_${scan.scanDate || 'undated'}`;
+    const session = buildSession();
+    if (session) {
+      rememberSession(session);
+      download(`${stem}_session.json`, JSON.stringify(session), 'application/json');
+    }
     download(`${stem}_measurements.csv`, toCsv(rows), 'text/csv');
     download(`${stem}_edit_trail.json`, JSON.stringify(findings.map((f) => ({ noduleId: f.fields.noduleId, signedOff: f.signedOff, trail: f.trail })), null, 2), 'application/json');
   }
@@ -211,7 +290,7 @@ export function App() {
               ))}
             </div>
             <Viewer volume={volume} slice={slice} window={WINDOWS[windowIndex]} findings={findings}
-              selectedId={selectedId} scrollStep={flip ? -1 : 1} tool={tool} brushMm={brushMm}
+              selectedId={selectedId} spots={spots} scrollStep={flip ? -1 : 1} tool={tool} brushMm={brushMm}
               onSlice={setSlice} onStroke={addFinding} onBrush={onBrush} />
             <div className="viewer-hint">
               {notice || (tool === 'outline'
@@ -230,6 +309,44 @@ export function App() {
             </div>
             <p className="muted small">Series {volume.meta.seriesNumber} · slice thickness {volume.meta.sliceThickness} mm · {volume.nz} slices</p>
 
+            <h2>Prior scan</h2>
+            {!prior && offered && (
+              <div className="card offer">
+                <p>A saved session for this patient was found: <b>{offered.timepoint}</b>, {offered.scanDate}, {offered.nodules.length} tumour{offered.nodules.length === 1 ? '' : 's'}.</p>
+                <button className="primary" onClick={() => usePrior(offered)}>Use it as the prior scan</button>
+              </div>
+            )}
+            {!prior && (
+              <p className="muted small">
+                For a follow-up scan, <button className="link" onClick={() => priorPicker.current?.click()}>load the prior session file</button>.
+                The tool then shows where each tumour was and matches new outlines to it.
+              </p>
+            )}
+            <input ref={priorPicker} type="file" accept=".json,application/json" hidden onChange={(e) => { void openPriorFile(e.target.files); e.target.value = ''; }} />
+            {prior && (
+              <>
+                <p className="muted small">{prior.timepoint}, {prior.scanDate}. Dashed circles show where each tumour is expected.</p>
+                {spots.map((sp) => {
+                  const hit = findings.find((f) => f.prior?.noduleId === sp.nodule.noduleId);
+                  return (
+                    <div key={sp.nodule.noduleId} className="prior-row">
+                      <b>{sp.nodule.noduleId}</b>
+                      <span className="muted">{sp.nodule.longAxisMm.toFixed(1)} mm · {sp.nodule.volumeMm3.toLocaleString()} mm³</span>
+                      <div className="spacer" />
+                      {hit ? <span className="status ok">Matched</span>
+                        : sp.notFound ? <span className="status todo">Not found</span>
+                        : <button onClick={() => setSlice(sp.z)}>Go to</button>}
+                      {!hit && (
+                        <button onClick={() => setSpots((all) => all.map((q) => (q === sp ? { ...q, notFound: !q.notFound } : q)))}>
+                          {sp.notFound ? 'Undo' : 'Not found'}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </>
+            )}
+
             <h2>Tumours <span className="muted">({signed.length} of {findings.length} signed off)</span></h2>
             {!findings.length && <p className="muted">No outlines yet. Drag a line across a tumour in the image.</p>}
             {findings.map((f) => (
@@ -246,6 +363,13 @@ export function App() {
                   <div><span>Mean diameter</span><b>{f.measurement.meanDiameterMm.toFixed(1)} mm</b></div>
                   <div><span>Volume</span><b>{Math.round(f.measurement.volumeMm3).toLocaleString()} mm³</b></div>
                 </div>
+                {f.prior && (
+                  <div className="change">
+                    Since prior: volume <b>{signedPct(f.measurement.volumeMm3, f.prior.volumeMm3)}</b>
+                    <span className="muted"> ({f.prior.volumeMm3.toLocaleString()} → {Math.round(f.measurement.volumeMm3).toLocaleString()} mm³)</span>,
+                    long axis <b>{signedMm(f.measurement.longAxisMm - f.prior.longAxisMm)}</b>
+                  </div>
+                )}
                 <div className="grid2">
                   <label>Lobe<select value={f.fields.lobe} onChange={(e) => setField(f.id, 'lobe', e.target.value)}>{LOBES.map((x) => <option key={x}>{x}</option>)}</select></label>
                   <label>Type<select value={f.fields.type} onChange={(e) => setField(f.id, 'type', e.target.value)}>{TYPES.map((x) => <option key={x}>{x}</option>)}</select></label>
@@ -263,8 +387,8 @@ export function App() {
             ))}
 
             <div className="export">
-              <button className="primary" disabled={!signed.length} onClick={exportSheet}>Export {signed.length || ''} row{signed.length === 1 ? '' : 's'} to sheet (CSV)</button>
-              <p className="muted small">Only signed-off outlines are exported. The edit trail is saved next to the sheet.</p>
+              <button className="primary" disabled={!signed.length && !spots.some((sp) => sp.notFound)} onClick={exportSheet}>Export {signed.length || ''} row{signed.length === 1 ? '' : 's'} to sheet (CSV)</button>
+              <p className="muted small">Only signed-off outlines are exported. The edit trail and a session file are saved next to the sheet. The session file is what the patient's next scan starts from; it holds a small blurred copy of the scan and stays on this computer.</p>
             </div>
           </aside>
         </main>
