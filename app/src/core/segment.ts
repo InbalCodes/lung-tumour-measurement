@@ -25,11 +25,19 @@ export interface SegmentParams {
   upperHu: number;
   /** Average each voxel with its in-plane neighbours first; lung reconstructions are noisy. */
   smooth: boolean;
+  /**
+   * Fit the width of the search region to the tumour instead of assuming it is as wide as it is
+   * long. The width is measured from the stroke towards the lung on each side, and the smaller
+   * side is used, so a tumour lying against the chest wall does not pull the wall in.
+   */
+  fitWidth: boolean;
+  /** Search depth along z: 0 = as deep as the fitted width, 1 = as deep as the stroke is long. */
+  zMix: number;
 }
 
 export const DEFAULT_PARAMS: SegmentParams = {
   boundScale: 1.0, zScale: 1.0, padMm: 2, openMm: 1, openFrac: 0.12,
-  thresholdFrac: 0.5, minThresholdHu: -750, maxThresholdHu: -200, upperHu: 300, smooth: true,
+  thresholdFrac: 0.5, minThresholdHu: -750, maxThresholdHu: -200, upperHu: 300, smooth: true, fitWidth: true, zMix: 1,
 };
 
 export interface SegmentResult {
@@ -114,14 +122,38 @@ export function segmentFromStroke(v: Volume, s: Stroke, p: SegmentParams = DEFAU
   let thresholdHu = backgroundHu + p.thresholdFrac * (tumourHu - backgroundHu);
   thresholdHu = Math.min(Math.max(thresholdHu, p.minThresholdHu), p.maxThresholdHu);
 
+  // Shape of the search region: an ellipsoid whose long axis is the stroke.
+  const ux = (s.x1 - s.x0) * v.dx / lenMm, uy = (s.y1 - s.y0) * v.dy / lenMm;
+  let rShort = rXY, rDepth = rZ;
+  if (p.fitWidth) {
+    // Walk out from the stroke on both sides until the tissue ends; keep the smaller side.
+    const reach = (px: number, py: number, sign: number) => {
+      const limit = lenMm * 0.6, step = Math.min(v.dx, v.dy) / 2;
+      for (let d = 0; d <= limit; d += step) {
+        const x = Math.round(px + sign * -uy * d / v.dx), y = Math.round(py + sign * ux * d / v.dy);
+        if (x < x0 || x > x1 || y < y0 || y > y1 || huAt(cz, y, x) < thresholdHu) return d;
+      }
+      return limit;
+    };
+    let half = 0;
+    for (let i = 0; i <= steps; i++) {
+      const t = 0.15 + 0.7 * (i / steps);
+      const px = s.x0 + (s.x1 - s.x0) * t, py = s.y0 + (s.y1 - s.y0) * t;
+      half = Math.max(half, Math.min(reach(px, py, 1), reach(px, py, -1)));
+    }
+    rShort = Math.min(rXY, Math.max(half, 1.5) * p.boundScale + p.padMm);
+    rDepth = p.zScale * (p.zMix * (lenMm / 2) + (1 - p.zMix) * half) + p.padMm;
+  }
+
   // Candidate voxels: dense enough, not bone, inside the ellipsoid.
   const cand = new Uint8Array(n);
   for (let z = 0, i = 0; z < nz; z++) {
-    const ez = (z + z0 - cz) * v.dz / rZ;
+    const ez = (z + z0 - cz) * v.dz / rDepth;
     for (let y = 0; y < ny; y++) {
-      const ey = (y + y0 - cy) * v.dy / rXY;
+      const my = (y + y0 - cy) * v.dy;
       for (let x = 0; x < nx; x++, i++) {
-        const ex = (x + x0 - cx) * v.dx / rXY;
+        const mx = (x + x0 - cx) * v.dx;
+        const ex = (mx * ux + my * uy) / rXY, ey = (-mx * uy + my * ux) / rShort;
         if (ex * ex + ey * ey + ez * ez > 1) continue;
         const h = huAt(z + z0, y + y0, x + x0);
         if (h >= thresholdHu && h <= p.upperHu) cand[i] = 1;
