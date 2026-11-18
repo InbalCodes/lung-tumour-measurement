@@ -81,20 +81,46 @@ outlines on each scan, so this is not yet a clean test of repeatability.
 4. **Small tumours gain nothing.** Under about 2 cm3 the current outline is as good or better.
 5. **Cost.** 3.3 seconds per slice on two CPU threads, so 1 to 2.5 minutes of computing for a tumour
    of 20 to 45 slices, plus a one-time download of about 125 MB. Computing can run while the reader moves on.
-   Speed in a real browser (WebAssembly or WebGPU) has not been measured.
+   In Chrome it measured about 6.5 seconds per slice on 8 threads (see below); WebGPU was not tried.
 
 ## Decision
 
 - Keep the current outline as the default: instant, no download, good on tumours surrounded by lung.
 - Add the model as an optional "outline from boxes" mode for tumours attached to the wall or
-  mediastinum, loaded only when asked for. Not built yet.
+  mediastinum, loaded only when asked for. Built as the **Boxes (AI)** tool (see below).
 - Do not let the model run on its own from a line.
+
+## In the tool: Boxes (AI)
+
+The reader picks **Boxes (AI)**, drags a box around the tumour on its first and last slice and about
+three in between, and presses **Outline from N boxes**. On slices without a drawn box the tool shows
+the blended box as a dashed rectangle. The result is an ordinary suggested outline: it can be
+corrected with Add / Erase, must be signed off, and the edit trail records that the model drew it.
+
+- The model runs in a background worker with ONNX Runtime Web (WebAssembly). The scan stays on the
+  computer. The model files (about 125 MB) are downloaded from the site on first use and then kept
+  in the browser's cache.
+- To keep the wait down, at most about 16 slices go through the model; on longer tumours every
+  second or third slice is used and the others copy their neighbour. On the development scans this
+  changed the result little (overlap 0.81 mean instead of 0.84, same median volume error of 12%).
+- The same code (`app/src/core/boxes.ts`) was run offline on two development scans and matched the
+  experiment (`eval/model/check_tool.mjs`): chest wall case 0.82 overlap and +25% volume, wide tumour
+  0.90 and -1%.
+- Measured in Chrome on a 16-core desktop, chest wall case, five hand-drawn boxes: 97 seconds for
+  15 slices (about 6.5 s per slice on 8 threads). Result 12,712 mm3 and 49 x 24 mm, against the
+  expert's 9,520 mm3 and 51 x 18 mm (+34%); the outline from a line gave +164% on this scan.
+- Threads matter: on one thread the same slice took 49 seconds. Browsers only allow threads on a
+  "cross-origin isolated" page, which plain static hosting cannot ask for, so the site ships a small
+  service worker (`app/public/isolate-sw.js`) that adds the two required headers. It reloads the
+  page once on the first visit.
+
+Model: MedSAM (Ma et al., Nature Communications 2024), Apache-2.0, in the ONNX form published with
+X-AnyLabeling v0.2.0. A 3D successor (MedSAM2) exists and was not tried.
 
 ## Not answered yet
 
 - The same comparison on the 21 test patients (one run, at the end).
 - Whether five boxes plus corrections is faster for Daniel than Add / Erase on the current outline.
   This needs timing, not Dice.
-- Browser speed and memory on the lab's workstation.
-- Licence check of the published ONNX files before they are shipped with the tool.
+- Speed and memory on the lab's own workstation (measured here on a 16-core desktop only).
 - Other models (a smaller general one, or a 3D lung-tumour model) were not tried.

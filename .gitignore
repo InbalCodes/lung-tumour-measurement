@@ -26,3 +26,5 @@ dist/
 Thumbs.db
 app/public/samples/
 demo-media/
+app/public/ort/
+app/public/models/

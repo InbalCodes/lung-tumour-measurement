@@ -51,7 +51,7 @@ async function oracle(c) {
  * Boxes on a few slices only (first, last and evenly spaced between; simulated with the expert's
  * boxes there), interpolated linearly for the slices in between.
  */
-async function keyframes(c, count) {
+async function keyframes(c, count, step = 1) {
   const full = new Uint8Array(c.nz * c.ny * c.nx), zs = [];
   for (let z = 0; z < c.nz; z++) if (bbox(c.ref, c.ny, c.nx, z * c.ny * c.nx)) zs.push(z);
   const keys = [...new Set(Array.from({ length: count }, (_, i) => zs[Math.round(i * (zs.length - 1) / (count - 1))]))];
@@ -60,6 +60,8 @@ async function keyframes(c, count) {
     let i = 0; while (i < keys.length - 2 && z > keys[i + 1]) i++;
     const t = keys.length > 1 ? (z - keys[i]) / (keys[i + 1] - keys[i]) : 0;
     const b = keys.length > 1 ? boxes[i].map((v, j) => Math.round(v + t * (boxes[i + 1][j] - v))) : boxes[0];
+    // step > 1: only every step-th slice goes through the model; the others copy the slice before
+    if (step > 1 && (z - zs[0]) % step && z !== zs[zs.length - 1]) { full.copyWithin(z * c.ny * c.nx, (z - 1) * c.ny * c.nx, z * c.ny * c.nx); continue; }
     full.set(await seg(c, z, pad(b, 2, c.ny, c.nx)), z * c.ny * c.nx);
   }
   return full;
@@ -112,7 +114,7 @@ try {
     const volume = { hu: c.hu, nz: c.nz, ny: c.ny, nx: c.nx, dz: c.dz, dy: c.dy, dx: c.dx, sliceNumbers: c.meta.instance_numbers, origin: [0, 0],
       zPositions: c.meta.instance_numbers.map((_, i) => i * c.dz), meta: {} };
     const row = { case: name, expert: k.expert, classical: { dice: k.dice, volumePct: k.volumePct, long: k.tool?.long, short: k.tool?.short } };
-    for (const [mode, fn] of [['oracle', () => oracle(c)], ['box', () => fromBox(c, k.slice)], ['stroke', () => fromStroke(c, k.slice, k.stroke)], ['hybrid', () => hybrid(c)], ['keys3', () => keyframes(c, 3)], ['keys5', () => keyframes(c, 5)]]) {
+    for (const [mode, fn] of [['oracle', () => oracle(c)], ['box', () => fromBox(c, k.slice)], ['stroke', () => fromStroke(c, k.slice, k.stroke)], ['hybrid', () => hybrid(c)], ['keys3', () => keyframes(c, 3)], ['keys5', () => keyframes(c, 5)], ['keys5half', () => keyframes(c, 5, 2)], ['keys5third', () => keyframes(c, 5, 3)]]) {
       const full = await fn(); writeFileSync(join(out, `${name}.${mode}.u8`), full);
       const mm = measure({ data: full, z0: 0, y0: 0, x0: 0, nz: c.nz, ny: c.ny, nx: c.nx }, volume);
       row[mode] = { dice: +dice2(full, c.ref).toFixed(2), volumePct: Math.round(100 * (mm.volumeMm3 - k.expert.volume) / k.expert.volume), long: mm.longAxisMm, short: mm.shortAxisMm };

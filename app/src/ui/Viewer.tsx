@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react';
+import { boxAt } from '../core/boxes.ts';
+import type { KeyBox } from '../core/boxes.ts';
 import type { Stroke } from '../core/segment.ts';
 import type { Volume } from '../core/volume.ts';
 import type { Finding, PriorSpot, WindowPreset } from './types.ts';
@@ -13,33 +15,37 @@ interface Props {
   spots: PriorSpot[];
   /** +1 or -1: which way the slice index moves when scrolling down. */
   scrollStep: number;
-  /** outline: drag a line across a tumour. brush / erase: correct the selected outline. */
+  /** Boxes drawn for the image model, sorted by slice. */
+  boxes: KeyBox[];
+  /** outline: drag a line across a tumour. brush / erase: correct the selected outline. box: drag a box for the image model. */
   tool: Tool;
   brushMm: number;
   onSlice: (slice: number) => void;
   onStroke: (stroke: Stroke) => void;
   onBrush: (phase: 'start' | 'move' | 'end', z: number, x: number, y: number) => void;
+  onBox: (box: KeyBox) => void;
 }
 
-export type Tool = 'outline' | 'brush' | 'erase';
+export type Tool = 'outline' | 'brush' | 'erase' | 'box';
 
 interface View { scale: number; ox: number; oy: number }
 type Drag =
   | { kind: 'stroke'; x0: number; y0: number; x1: number; y1: number }
+  | { kind: 'box'; x0: number; y0: number; x1: number; y1: number }
   | { kind: 'brush' }
   | { kind: 'pan'; lastX: number; lastY: number };
 
-const COLOURS = { suggested: '#fbbf24', signed: '#34d399', selected: '#38bdf8' };
+const COLOURS = { suggested: '#fbbf24', signed: '#34d399', selected: '#38bdf8', box: '#a78bfa' };
 
 /** Axial slice viewer: scroll to change slice, drag across a tumour to outline it. */
-export function Viewer({ volume, slice, window: win, findings, selectedId, spots, scrollStep, tool, brushMm, onSlice, onStroke, onBrush }: Props) {
+export function Viewer({ volume, slice, window: win, findings, selectedId, spots, boxes, scrollStep, tool, brushMm, onSlice, onStroke, onBrush, onBox }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const view = useRef<View>({ scale: 1, ox: 0, oy: 0 });
   const drag = useRef<Drag | null>(null);
   const sliceImage = useRef<{ key: string; canvas: HTMLCanvasElement } | null>(null);
   const hover = useRef<{ x: number; y: number } | null>(null);
-  const latest = useRef({ volume, slice, win, findings, selectedId, spots, scrollStep, tool, brushMm, onSlice, onStroke, onBrush });
-  latest.current = { volume, slice, win, findings, selectedId, spots, scrollStep, tool, brushMm, onSlice, onStroke, onBrush };
+  const latest = useRef({ volume, slice, win, findings, selectedId, spots, boxes, scrollStep, tool, brushMm, onSlice, onStroke, onBrush, onBox });
+  latest.current = { volume, slice, win, findings, selectedId, spots, boxes, scrollStep, tool, brushMm, onSlice, onStroke, onBrush, onBox };
 
   const fit = () => {
     const c = canvasRef.current!;
@@ -149,7 +155,28 @@ export function Viewer({ volume, slice, window: win, findings, selectedId, spots
       ctx.fillText(`${sp.nodule.noduleId} prior`, sx + r + 4, sy + r);
     }
 
+    // Boxes for the image model: solid where one was drawn, dashed where it is blended from its neighbours.
+    const bs = latest.current.boxes, here = boxAt(bs, z);
+    if (here) {
+      const drawn = bs.some((b) => b.z === z);
+      const [ax, ay] = toScreen(here[0] - 0.5, here[1] - 0.5), [bx, by] = toScreen(here[2] + 0.5, here[3] + 0.5);
+      ctx.strokeStyle = COLOURS.box;
+      ctx.lineWidth = drawn ? 2 : 1;
+      ctx.setLineDash(drawn ? [] : [5, 4]);
+      ctx.strokeRect(ax, ay, bx - ax, by - ay);
+      ctx.setLineDash([]);
+      ctx.fillStyle = COLOURS.box;
+      ctx.font = '600 12px system-ui, sans-serif';
+      ctx.fillText(drawn ? 'Box' : 'Box (in between)', ax, ay - 5);
+    }
+
     const d = drag.current;
+    if (d?.kind === 'box') {
+      const [ax, ay] = toScreen(d.x0, d.y0), [bx, by] = toScreen(d.x1, d.y1);
+      ctx.strokeStyle = COLOURS.box;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(ax, ay, bx - ax, by - ay);
+    }
     if (d?.kind === 'stroke') {
       const [ax, ay] = toScreen(d.x0, d.y0), [bx, by] = toScreen(d.x1, d.y1);
       ctx.strokeStyle = '#f8fafc';
@@ -162,7 +189,7 @@ export function Viewer({ volume, slice, window: win, findings, selectedId, spots
     }
     // Brush outline under the pointer.
     const { tool: t, brushMm: r } = latest.current;
-    if (t !== 'outline' && hover.current) {
+    if ((t === 'brush' || t === 'erase') && hover.current) {
       ctx.strokeStyle = t === 'brush' ? COLOURS.selected : '#f87171';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -205,8 +232,8 @@ export function Viewer({ volume, slice, window: win, findings, selectedId, spots
       c.setPointerCapture(e.pointerId);
       if (e.button === 0) {
         const [x, y] = toVoxel(sx, sy);
-        if (latest.current.tool === 'outline') {
-          drag.current = { kind: 'stroke', x0: x, y0: y, x1: x, y1: y };
+        if (latest.current.tool === 'outline' || latest.current.tool === 'box') {
+          drag.current = { kind: latest.current.tool === 'box' ? 'box' : 'stroke', x0: x, y0: y, x1: x, y1: y };
         } else {
           drag.current = { kind: 'brush' };
           latest.current.onBrush('start', latest.current.slice, x, y);
@@ -219,8 +246,8 @@ export function Viewer({ volume, slice, window: win, findings, selectedId, spots
       const d = drag.current;
       const [sx, sy] = pos(e);
       hover.current = { x: sx, y: sy };
-      if (!d) { if (latest.current.tool !== 'outline') draw(); return; }
-      if (d.kind === 'stroke') {
+      if (!d) { if (latest.current.tool === 'brush' || latest.current.tool === 'erase') draw(); return; }
+      if (d.kind === 'stroke' || d.kind === 'box') {
         [d.x1, d.y1] = toVoxel(sx, sy);
       } else if (d.kind === 'brush') {
         const [x, y] = toVoxel(sx, sy);
@@ -235,6 +262,8 @@ export function Viewer({ volume, slice, window: win, findings, selectedId, spots
       const d = drag.current;
       drag.current = null;
       if (d?.kind === 'stroke') latest.current.onStroke({ z: latest.current.slice, x0: d.x0, y0: d.y0, x1: d.x1, y1: d.y1 });
+      if (d?.kind === 'box' && Math.abs(d.x1 - d.x0) > 2 && Math.abs(d.y1 - d.y0) > 2)
+        latest.current.onBox({ z: latest.current.slice, x0: Math.min(d.x0, d.x1), y0: Math.min(d.y0, d.y1), x1: Math.max(d.x0, d.x1), y1: Math.max(d.y0, d.y1) });
       if (d?.kind === 'brush') latest.current.onBrush('end', latest.current.slice, 0, 0);
       draw();
     };
@@ -257,5 +286,5 @@ export function Viewer({ volume, slice, window: win, findings, selectedId, spots
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <canvas ref={canvasRef} className={`viewer-canvas ${tool === 'outline' ? '' : 'brushing'}`} />;
+  return <canvas ref={canvasRef} className={`viewer-canvas ${tool === 'brush' || tool === 'erase' ? 'brushing' : ''}`} />;
 }

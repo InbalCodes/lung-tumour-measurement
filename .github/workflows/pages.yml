@@ -40,6 +40,17 @@ jobs:
           node scripts/build_sample.ts \
             baseline@145 "Sample scan 1 (first scan)" ../data/dicom/ct/1.3.6.1.4.1.9328.50.1.177903673228104341213224928761701786693 \
             followup "Sample scan 2 (same patient, repeat scan)" ../data/dicom/ct/1.3.6.1.4.1.9328.50.1.76808802982262101679502232663993705555
+      # The image model behind "Boxes (AI)": MedSAM (Apache-2.0), in the ONNX form published with
+      # X-AnyLabeling. The files are too large for the repository, so they are fetched at build time
+      # and served from this site. If the download fails the site is still built; the tool then
+      # reports that the model is not available.
+      - name: Fetch image model
+        continue-on-error: true
+        run: |
+          mkdir -p app/public/models
+          base=https://github.com/CVHub520/X-AnyLabeling/releases/download/v0.2.0
+          curl -fL --retry 3 -o app/public/models/medsam_vit_b.encoder.quant.onnx $base/medsam_vit_b.encoder.quant.onnx
+          curl -fL --retry 3 -o app/public/models/medsam_vit_b.decoder.onnx $base/medsam_vit_b.decoder.onnx
       - name: Build
         working-directory: app
         run: npm run build

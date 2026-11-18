@@ -18,7 +18,7 @@ Work in progress. This README is updated as the project moves forward.
 | Data download | Scripted (see below) |
 | Client discovery | Done, scope agreed with the lab |
 | Reference measurements and quality bar | Done (see docs/reference.md) |
-| Tool | Viewer, outline from a stroke, correction, sign-off, sheet export, follow-up against a prior scan |
+| Tool | Viewer, outline from a stroke, outline from boxes with an image model, correction, sign-off, sheet export, follow-up against a prior scan |
 | Known failures | Development scans (see docs/failures.md) |
 | Image model comparison | Development scans (see docs/model-experiment.md) |
 | Results | Test set not run yet |

@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { boxAt, fillSkipped, modelBox, modelSlices, regionMask, roiFor, sliceInput, sortBoxes, writeSlice } from '../core/boxes.ts';
+import type { KeyBox } from '../core/boxes.ts';
 import { buildVolume, parseSlice } from '../core/dicom.ts';
 import type { ParsedSlice } from '../core/dicom.ts';
 import { measure } from '../core/measure.ts';
@@ -10,6 +12,7 @@ import { LOBES, MATCHES, TYPES, formatDicomDate, notFoundRow, sheetRow, toCsv } 
 import type { FindingFields, ScanFields } from '../core/sheet.ts';
 import type { Mask, Volume } from '../core/volume.ts';
 import { cloneMask, cropMask, maskVoxelCount, paintLine } from '../core/volume.ts';
+import { BoxModel } from './model.ts';
 import { Viewer } from './Viewer.tsx';
 import type { Tool } from './Viewer.tsx';
 import { WINDOWS } from './types.ts';
@@ -20,6 +23,9 @@ interface SampleScan { id: string; label: string; startSlice: number | null; fil
 
 const STORE = 'ltm.sessions';
 const storedSessions = (): Session[] => { try { return JSON.parse(localStorage.getItem(STORE) ?? '[]'); } catch { return []; } };
+
+/** One model for the whole visit: it is downloaded and started the first time it is used. */
+const boxModel = new BoxModel();
 
 const now = () => new Date().toISOString();
 const signedPct = (value: number, before: number) => { const p = before ? (100 * (value - before)) / before : 0; return `${p >= 0 ? '+' : ''}${p.toFixed(1)}%`; };
@@ -49,6 +55,8 @@ export function App() {
   const [offered, setOffered] = useState<Session | null>(null);
   const priorPicker = useRef<HTMLInputElement>(null);
   const [samples, setSamples] = useState<SampleScan[]>([]);
+  const [boxes, setBoxes] = useState<KeyBox[]>([]);
+  const [modelBusy, setModelBusy] = useState('');
   const edit = useRef<{ id: number; mask: Mask; before: number; z: number; last: [number, number] | null } | null>(null);
 
   // A folder picker reads files straight from disk; nothing is sent anywhere.
@@ -115,7 +123,7 @@ export function App() {
 
   function resetScan() {
     setError(''); setNotice(''); setVolume(null); setFindings([]); setSelectedId(null);
-    setPrior(null); setSpots([]); setOffered(null); setThumb(null);
+    setPrior(null); setSpots([]); setOffered(null); setThumb(null); setBoxes([]);
   }
 
   function showVolume(v: Volume) {
@@ -220,12 +228,19 @@ export function App() {
       return;
     }
     setNotice('');
+    place(result.mask, stroke, result.thresholdHu,
+      `Tool suggested an outline from a ${result.strokeMm.toFixed(1)} mm stroke on slice ${volume.sliceNumbers[stroke.z]} (threshold ${Math.round(result.thresholdHu)} HU, ${Math.round(performance.now() - t0)} ms).`);
+  }
+
+  /** Add a suggested outline to the list, matched to the prior scan when there is one. */
+  function place(mask: Mask, stroke: Stroke, thresholdHu: number, event: string) {
+    if (!volume) return;
     const id = nextId.current++;
     const fields: FindingFields = { noduleId: `N${id}`, lobe: '', type: 'Solid', solidComponentMm: '', matchToPrior: '', notes: '' };
-    const trail = [{ at: now(), event: `Tool suggested an outline from a ${result.strokeMm.toFixed(1)} mm stroke on slice ${volume.sliceNumbers[stroke.z]} (threshold ${Math.round(result.thresholdHu)} HU, ${Math.round(performance.now() - t0)} ms).` }];
+    const trail = [{ at: now(), event }];
     // On a follow-up scan, pair the outline with the nearest unmatched nodule of the prior scan.
     const taken = new Set(findings.map((f) => f.prior?.noduleId).filter((x): x is string => !!x));
-    const match = matchPrior(maskCentroidMm(result.mask, volume), spots.filter((sp) => !sp.notFound), taken);
+    const match = matchPrior(maskCentroidMm(mask, volume), spots.filter((sp) => !sp.notFound), taken);
     if (match) {
       Object.assign(fields, { noduleId: match.nodule.noduleId, lobe: match.nodule.lobe, type: match.nodule.type, matchToPrior: match.confidence });
       trail.push({ at: now(), event: `Tool matched it to ${match.nodule.noduleId} of the prior scan (${match.distanceMm.toFixed(1)} mm from the expected position, ${match.confidence.toLowerCase()}).` });
@@ -236,12 +251,51 @@ export function App() {
       while (used.has(`N${k}`)) k++;
       fields.noduleId = `N${k}`;
     }
-    const finding: Finding = {
-      id, mask: result.mask, measurement: measure(result.mask, volume), fields, signedOff: false, stroke,
-      thresholdHu: result.thresholdHu, prior: match?.nodule, trail,
-    };
+    const finding: Finding = { id, mask, measurement: measure(mask, volume), fields, signedOff: false, stroke, thresholdHu, prior: match?.nodule, trail };
     setFindings((f) => [...f, finding]);
     setSelectedId(id);
+  }
+
+  /** One box per slice: drawing again on a slice replaces the box there. */
+  const addBox = (box: KeyBox) => { setNotice(''); setBoxes((all) => sortBoxes([...all.filter((b) => b.z !== box.z), box])); };
+
+  /**
+   * Outline from boxes with the image model. Meant for tumours that touch the chest wall or
+   * mediastinum, where the outline from a line leaks. Slower: each slice takes seconds.
+   */
+  async function outlineFromBoxes() {
+    if (!volume || !boxes.length || modelBusy) return;
+    const v = volume, sorted = sortBoxes(boxes), started = performance.now();
+    try {
+      setModelBusy('Starting the image model…');
+      await boxModel.load((mb, total) => setModelBusy(`Getting the image model: ${mb} of ${total} MB (first time only; it is then kept in this browser)`));
+      const roi = roiFor(v, sorted), mask = regionMask(v, sorted, roi), zs = modelSlices(sorted);
+      let spent = 0;
+      for (let i = 0; i < zs.length; i++) {
+        const left = i ? ` About ${Math.ceil(((spent / i) * (zs.length - i)) / 1000)} s left.` : '';
+        setModelBusy(`Image model: slice ${i + 1} of ${zs.length}.${left}${boxModel.threads === 1 ? ' Running on one thread, which is slow; reload the page once if this is its first visit.' : ''}`);
+        const { low, ms } = await boxModel.slice(sliceInput(v, zs[i], roi), modelBox(boxAt(sorted, zs[i])!, roi));
+        spent += ms;
+        writeSlice(mask, zs[i], low, roi);
+      }
+      fillSkipped(mask, zs);
+      const cropped = cropMask(mask);
+      if (!cropped) { setNotice('The image model found nothing inside the boxes. Check that they surround the tumour.'); return; }
+      // A line along the long axis, so a follow-up scan can start from this outline like any other.
+      const m = measure(cropped, v), a = m.longAxis;
+      const stroke: Stroke = a ? { z: m.sliceIndex, x0: a.x0, y0: a.y0, x1: a.x1, y1: a.y1 } : { z: sorted[0].z, x0: sorted[0].x0, y0: sorted[0].y0, x1: sorted[0].x1, y1: sorted[0].y1 };
+      const thresholdHu = segmentFromStroke(v, stroke)?.thresholdHu ?? -400;
+      const seconds = Math.round((performance.now() - started) / 1000);
+      place(cropped, stroke, thresholdHu,
+        `Image model (MedSAM) suggested an outline from ${sorted.length} box${sorted.length === 1 ? '' : 'es'} on slice${sorted.length === 1 ? '' : 's'} ${sorted.map((b) => v.sliceNumbers[b.z]).join(', ')}; ${zs.length} of ${mask.nz} slices went through the model, the rest copy their neighbour (${seconds} s).`);
+      setBoxes([]);
+      setTool('brush');
+      setNotice(`Outline from ${sorted.length} box${sorted.length === 1 ? '' : 'es'} ready in ${seconds} s. The model tends to draw slightly small, so check the edges and correct with Add and Erase before signing off.`);
+    } catch (e) {
+      setNotice(`The image model could not run: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setModelBusy('');
+    }
   }
 
   /** Brush and eraser: the researcher corrects the selected outline by hand. */
@@ -355,14 +409,14 @@ export function App() {
               <input type="range" min={0} max={volume.nz - 1} value={flip ? volume.nz - 1 - slice : slice}
                 onChange={(e) => setSlice(flip ? volume.nz - 1 - Number(e.target.value) : Number(e.target.value))} />
               <span className="group">
-                {(['outline', 'brush', 'erase'] as Tool[]).map((t) => (
-                  <button key={t} className={t === tool ? 'active' : ''} onClick={() => setTool(t)}>
-                    {t === 'outline' ? 'Outline' : t === 'brush' ? 'Add' : 'Erase'}
+                {(['outline', 'box', 'brush', 'erase'] as Tool[]).map((t) => (
+                  <button key={t} className={t === tool ? 'active' : ''} title={t === 'box' ? 'Outline with the image model, for tumours that touch the chest wall or mediastinum' : undefined} onClick={() => setTool(t)}>
+                    {t === 'outline' ? 'Outline' : t === 'box' ? 'Boxes (AI)' : t === 'brush' ? 'Add' : 'Erase'}
                   </button>
                 ))}
               </span>
               {/* Always laid out, hidden while outlining, so the tool buttons never move under the pointer. */}
-              <span className={`group brush ${tool === 'outline' ? 'hidden' : ''}`}>
+              <span className={`group brush ${tool === 'brush' || tool === 'erase' ? '' : 'hidden'}`}>
                 <span className="muted">Brush {brushMm} mm</span>
                 <input type="range" min={1} max={15} value={brushMm} onChange={(e) => setBrushMm(Number(e.target.value))} />
                 <label className="check"><input type="checkbox" checked={ball} onChange={(e) => setBall(e.target.checked)} />3D</label>
@@ -372,12 +426,22 @@ export function App() {
               ))}
             </div>
             <Viewer volume={volume} slice={slice} window={WINDOWS[windowIndex]} findings={findings}
-              selectedId={selectedId} spots={spots} scrollStep={flip ? -1 : 1} tool={tool} brushMm={brushMm}
-              onSlice={setSlice} onStroke={addFinding} onBrush={onBrush} />
+              selectedId={selectedId} spots={spots} boxes={boxes} scrollStep={flip ? -1 : 1} tool={tool} brushMm={brushMm}
+              onSlice={setSlice} onStroke={addFinding} onBrush={onBrush} onBox={addBox} />
             <div className="viewer-hint">
-              {notice || (tool === 'outline'
+              {modelBusy || notice || (tool === 'outline'
                 ? 'Scroll to move through slices. Drag a line across a tumour to outline and measure it. Right-drag to pan, Ctrl+scroll to zoom.'
-                : 'Paint on the image to correct the selected outline. Measurements update when you release the mouse.')}
+                : tool === 'box'
+                  ? 'For tumours that touch the chest wall or mediastinum: drag a box around the tumour on its first and last slice and on about three slices in between, then run the image model.'
+                  : 'Paint on the image to correct the selected outline. Measurements update when you release the mouse.')}
+              {tool === 'box' && (
+                <span className="box-actions">
+                  <button className="primary" disabled={!boxes.length || !!modelBusy} onClick={() => void outlineFromBoxes()}>
+                    Outline from {boxes.length} box{boxes.length === 1 ? '' : 'es'}
+                  </button>
+                  <button disabled={!boxes.length || !!modelBusy} onClick={() => setBoxes([])}>Clear boxes</button>
+                </span>
+              )}
             </div>
           </section>
 
