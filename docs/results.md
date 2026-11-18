@@ -67,7 +67,7 @@ by a timed session as soon as one is possible.
 
 | Step | Today (Daniel's figures) | With the tool | Basis for the tool column |
 |---|---|---|---|
-| Find the nodules (scroll the scan twice) | 10-20 min | 10-20 min | Not addressed. Automatic finding was not built. |
+| Find the nodules (scroll the scan twice) | 10-20 min | 10-20 min | Not addressed. A simple automatic search was tested and is not usable. |
 | Measure diameters | 2-4 min per nodule | about 1 min | One line, then check. Assumption. |
 | Record in the sheet | 3-5 min | about 1 min | Export fills the row; lobe and type are still entered. |
 | Match to the prior scan (follow-ups) | about 10 min | about 2 min | 19 of 19 tumours found on the test pairs; Daniel still reviews each one. Assumption for the review time. |
@@ -98,7 +98,7 @@ follow-ups, and Daniel then said he will review and adjust every carried-over ou
 | Runs in the browser, nothing uploaded, no cost | Met, including the image model. |
 | Daniel sees, edits and signs off every outline | Met. Unsigned outlines are never exported. |
 | Export in the lab's sheet format | Met; confirmed by Daniel. |
-| Find nodules automatically | Not built. See limits. |
+| Find nodules automatically | Not built. A simple search was tested for an hour and is not usable: it marks the tumour in about half the test scans, with a median of 17 other marks per scan ([detection experiment](detection-experiment.md)). |
 
 ## 5. Limits
 

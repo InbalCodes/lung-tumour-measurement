@@ -21,6 +21,7 @@ Work in progress. This README is updated as the project moves forward.
 | Tool | Viewer, outline from a stroke, outline from boxes with an image model, correction, sign-off, sheet export, follow-up against a prior scan |
 | Known failures | Development scans (see docs/failures.md) |
 | Image model comparison | Development scans (see docs/model-experiment.md) |
+| Automatic finding of nodules | Tested, not usable, not in the tool (see docs/detection-experiment.md) |
 | Results | Test scans run once (see docs/results.md) |
 
 ## Repository layout

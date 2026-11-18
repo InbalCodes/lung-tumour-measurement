@@ -1,0 +1,1504 @@
+{
+ "summary": {
+  "split": "test",
+  "scans": 40,
+  "pending": 0,
+  "msMedian": 1778.5,
+  "tumourInsideSearchAreaMedian": 0.835,
+  "default": {
+   "found": 21,
+   "of": 40,
+   "otherMarksMedian": 17,
+   "otherMarksMax": 47,
+   "other6to10Median": 12,
+   "other10to20Median": 3,
+   "other20plusMedian": 1,
+   "missed": [
+    "RIDER-1129164940_retest (61.2 mm, covered 0)",
+    "RIDER-1129164940_test (69.3 mm, covered 0)",
+    "RIDER-1332496276_test (51.4 mm, covered 0.15)",
+    "RIDER-1346917136_retest (65.8 mm, covered 0.09)",
+    "RIDER-1346917136_test (64.6 mm, covered 0.16)",
+    "RIDER-1801720707_retest (13.3 mm, covered 0)",
+    "RIDER-2016615262_retest (49.8 mm, covered 0.02)",
+    "RIDER-2016615262_test (62.8 mm, covered 0.04)",
+    "RIDER-2073083717_retest (29.1 mm, covered 0.01)",
+    "RIDER-2073083717_test (36.9 mm, covered 0.01)",
+    "RIDER-2151469008_retest (53.5 mm, covered 0.05)",
+    "RIDER-2151469008_test (45.2 mm, covered 0.06)",
+    "RIDER-3152132495_retest (93.1 mm, covered 0)",
+    "RIDER-3152132495_test (95.3 mm, covered 0)",
+    "RIDER-3160137230_retest (30.1 mm, covered 0)",
+    "RIDER-3160137230_test (27.6 mm, covered 0)",
+    "RIDER-6324870494_retest (31.7 mm, covered 0.04)",
+    "RIDER-6324870494_test (30.1 mm, covered 0.08)",
+    "RIDER-8509201188_test (84.6 mm, covered 0.01)"
+   ]
+  },
+  "strict": {
+   "found": 18,
+   "of": 40,
+   "otherMarksMedian": 11,
+   "otherMarksMax": 24,
+   "other6to10Median": 5,
+   "other10to20Median": 5,
+   "other20plusMedian": 2,
+   "missed": [
+    "RIDER-1129164940_retest (61.2 mm, covered 0.1)",
+    "RIDER-1129164940_test (69.3 mm, covered 0.17)",
+    "RIDER-1332496276_retest (48.4 mm, covered 0.16)",
+    "RIDER-1332496276_test (51.4 mm, covered 0.07)",
+    "RIDER-1760553574_test (28 mm, covered 0.13)",
+    "RIDER-1801720707_retest (13.3 mm, covered 0)",
+    "RIDER-1801720707_test (13 mm, covered 0)",
+    "RIDER-2016615262_retest (49.8 mm, covered 0.02)",
+    "RIDER-2016615262_test (62.8 mm, covered 0.02)",
+    "RIDER-2073083717_retest (29.1 mm, covered 0)",
+    "RIDER-2073083717_test (36.9 mm, covered 0)",
+    "RIDER-2151469008_retest (53.5 mm, covered 0.18)",
+    "RIDER-2151469008_test (45.2 mm, covered 0.08)",
+    "RIDER-2357766186_test (53.6 mm, covered 0.19)",
+    "RIDER-2799584460_retest (12.9 mm, covered 0.16)",
+    "RIDER-3152132495_retest (93.1 mm, covered 0.02)",
+    "RIDER-3152132495_test (95.3 mm, covered 0.02)",
+    "RIDER-6324870494_retest (31.7 mm, covered 0)",
+    "RIDER-6324870494_test (30.1 mm, covered 0.02)",
+    "RIDER-8509201188_test (84.6 mm, covered 0.06)",
+    "RIDER-9763310455_retest (15.9 mm, covered 0)",
+    "RIDER-9763310455_test (17 mm, covered 0)"
+   ]
+  },
+  "combined": {
+   "found": 21,
+   "of": 40,
+   "otherMarksMedian": 64,
+   "otherMarksMax": 125,
+   "other6to10Median": 50.5,
+   "other10to20Median": 11,
+   "other20plusMedian": 3,
+   "missed": [
+    "RIDER-1129164940_retest (61.2 mm, covered 0.09)",
+    "RIDER-1129164940_test (69.3 mm, covered 0.17)",
+    "RIDER-1332496276_test (51.4 mm, covered 0.1)",
+    "RIDER-1760553574_retest (31.3 mm, covered 0.19)",
+    "RIDER-1760553574_test (28 mm, covered 0.06)",
+    "RIDER-1801720707_retest (13.3 mm, covered 0)",
+    "RIDER-2016615262_retest (49.8 mm, covered 0.02)",
+    "RIDER-2016615262_test (62.8 mm, covered 0.02)",
+    "RIDER-2073083717_retest (29.1 mm, covered 0.01)",
+    "RIDER-2073083717_test (36.9 mm, covered 0)",
+    "RIDER-2151469008_retest (53.5 mm, covered 0.08)",
+    "RIDER-2151469008_test (45.2 mm, covered 0.04)",
+    "RIDER-2357766186_test (53.6 mm, covered 0.19)",
+    "RIDER-2669524182_retest (41.9 mm, covered 0.1)",
+    "RIDER-3152132495_retest (93.1 mm, covered 0.03)",
+    "RIDER-3152132495_test (95.3 mm, covered 0.03)",
+    "RIDER-6324870494_retest (31.7 mm, covered 0.04)",
+    "RIDER-6324870494_test (30.1 mm, covered 0.04)",
+    "RIDER-8509201188_test (84.6 mm, covered 0.07)"
+   ]
+  }
+ },
+ "scans": [
+  {
+   "case": "RIDER-1129164940_retest",
+   "expertCm3": 54.4,
+   "expertLongMm": 61.2,
+   "lungLitres": 4.9,
+   "tumourInsideSearchArea": 0.46,
+   "default": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 13,
+    "otherMarks": 13,
+    "other6to10": 12,
+    "other10to20": 1,
+    "other20plus": 0
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.1,
+    "marks": 16,
+    "otherMarks": 14,
+    "other6to10": 7,
+    "other10to20": 5,
+    "other20plus": 2
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.09,
+    "marks": 78,
+    "otherMarks": 73,
+    "other6to10": 58,
+    "other10to20": 11,
+    "other20plus": 4
+   },
+   "ms": 2607
+  },
+  {
+   "case": "RIDER-1129164940_test",
+   "expertCm3": 61.1,
+   "expertLongMm": 69.3,
+   "lungLitres": 4.6,
+   "tumourInsideSearchArea": 0.52,
+   "default": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 14,
+    "otherMarks": 14,
+    "other6to10": 13,
+    "other10to20": 1,
+    "other20plus": 0
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.17,
+    "marks": 10,
+    "otherMarks": 8,
+    "other6to10": 2,
+    "other10to20": 4,
+    "other20plus": 2
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.17,
+    "marks": 76,
+    "otherMarks": 73,
+    "other6to10": 56,
+    "other10to20": 13,
+    "other20plus": 4
+   },
+   "ms": 1592
+  },
+  {
+   "case": "RIDER-1332496276_retest",
+   "expertCm3": 25.1,
+   "expertLongMm": 48.4,
+   "lungLitres": 6.2,
+   "tumourInsideSearchArea": 0.47,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.22,
+    "marks": 18,
+    "otherMarks": 17,
+    "other6to10": 9,
+    "other10to20": 7,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.16,
+    "marks": 12,
+    "otherMarks": 11,
+    "other6to10": 1,
+    "other10to20": 7,
+    "other20plus": 3
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.2,
+    "marks": 67,
+    "otherMarks": 66,
+    "other6to10": 47,
+    "other10to20": 16,
+    "other20plus": 3
+   },
+   "ms": 2277
+  },
+  {
+   "case": "RIDER-1332496276_test",
+   "expertCm3": 26.9,
+   "expertLongMm": 51.4,
+   "lungLitres": 6.2,
+   "tumourInsideSearchArea": 0.39,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.15,
+    "marks": 14,
+    "otherMarks": 13,
+    "other6to10": 7,
+    "other10to20": 5,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.07,
+    "marks": 15,
+    "otherMarks": 14,
+    "other6to10": 4,
+    "other10to20": 7,
+    "other20plus": 3
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.1,
+    "marks": 65,
+    "otherMarks": 64,
+    "other6to10": 45,
+    "other10to20": 16,
+    "other20plus": 3
+   },
+   "ms": 2230
+  },
+  {
+   "case": "RIDER-1346917136_retest",
+   "expertCm3": 88.3,
+   "expertLongMm": 65.8,
+   "lungLitres": 4.7,
+   "tumourInsideSearchArea": 0.83,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.09,
+    "marks": 23,
+    "otherMarks": 22,
+    "other6to10": 14,
+    "other10to20": 7,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.54,
+    "marks": 9,
+    "otherMarks": 7,
+    "other6to10": 2,
+    "other10to20": 2,
+    "other20plus": 3
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.57,
+    "marks": 44,
+    "otherMarks": 42,
+    "other6to10": 30,
+    "other10to20": 9,
+    "other20plus": 3
+   },
+   "ms": 1492
+  },
+  {
+   "case": "RIDER-1346917136_test",
+   "expertCm3": 88.1,
+   "expertLongMm": 64.6,
+   "lungLitres": 5.1,
+   "tumourInsideSearchArea": 0.88,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.16,
+    "marks": 19,
+    "otherMarks": 18,
+    "other6to10": 12,
+    "other10to20": 4,
+    "other20plus": 2
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.53,
+    "marks": 11,
+    "otherMarks": 9,
+    "other6to10": 2,
+    "other10to20": 3,
+    "other20plus": 4
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.55,
+    "marks": 55,
+    "otherMarks": 53,
+    "other6to10": 40,
+    "other10to20": 7,
+    "other20plus": 6
+   },
+   "ms": 1545
+  },
+  {
+   "case": "RIDER-1500037140_retest",
+   "expertCm3": 10.3,
+   "expertLongMm": 32.8,
+   "lungLitres": 6.6,
+   "tumourInsideSearchArea": 0.84,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.54,
+    "marks": 14,
+    "otherMarks": 13,
+    "other6to10": 10,
+    "other10to20": 3,
+    "other20plus": 0
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.47,
+    "marks": 10,
+    "otherMarks": 9,
+    "other6to10": 4,
+    "other10to20": 2,
+    "other20plus": 3
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.55,
+    "marks": 60,
+    "otherMarks": 59,
+    "other6to10": 42,
+    "other10to20": 12,
+    "other20plus": 5
+   },
+   "ms": 1819
+  },
+  {
+   "case": "RIDER-1500037140_test",
+   "expertCm3": 8.7,
+   "expertLongMm": 30.7,
+   "lungLitres": 7.3,
+   "tumourInsideSearchArea": 0.87,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.6,
+    "marks": 16,
+    "otherMarks": 15,
+    "other6to10": 12,
+    "other10to20": 2,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.52,
+    "marks": 10,
+    "otherMarks": 9,
+    "other6to10": 3,
+    "other10to20": 2,
+    "other20plus": 4
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.61,
+    "marks": 73,
+    "otherMarks": 72,
+    "other6to10": 57,
+    "other10to20": 9,
+    "other20plus": 6
+   },
+   "ms": 2032
+  },
+  {
+   "case": "RIDER-1760553574_retest",
+   "expertCm3": 3.9,
+   "expertLongMm": 31.3,
+   "lungLitres": 4.4,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.49,
+    "marks": 12,
+    "otherMarks": 11,
+    "other6to10": 9,
+    "other10to20": 1,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.21,
+    "marks": 14,
+    "otherMarks": 13,
+    "other6to10": 4,
+    "other10to20": 7,
+    "other20plus": 2
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.19,
+    "marks": 70,
+    "otherMarks": 66,
+    "other6to10": 50,
+    "other10to20": 14,
+    "other20plus": 2
+   },
+   "ms": 1353
+  },
+  {
+   "case": "RIDER-1760553574_test",
+   "expertCm3": 3.9,
+   "expertLongMm": 28,
+   "lungLitres": 4.3,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.53,
+    "marks": 13,
+    "otherMarks": 12,
+    "other6to10": 8,
+    "other10to20": 2,
+    "other20plus": 2
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.13,
+    "marks": 12,
+    "otherMarks": 11,
+    "other6to10": 3,
+    "other10to20": 4,
+    "other20plus": 4
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.06,
+    "marks": 77,
+    "otherMarks": 72,
+    "other6to10": 55,
+    "other10to20": 15,
+    "other20plus": 2
+   },
+   "ms": 1408
+  },
+  {
+   "case": "RIDER-1801720707_retest",
+   "expertCm3": 0.3,
+   "expertLongMm": 13.3,
+   "lungLitres": 4.1,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 16,
+    "otherMarks": 16,
+    "other6to10": 12,
+    "other10to20": 3,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 9,
+    "otherMarks": 9,
+    "other6to10": 3,
+    "other10to20": 3,
+    "other20plus": 3
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 51,
+    "otherMarks": 51,
+    "other6to10": 39,
+    "other10to20": 9,
+    "other20plus": 3
+   },
+   "ms": 1707
+  },
+  {
+   "case": "RIDER-1801720707_test",
+   "expertCm3": 0.3,
+   "expertLongMm": 13,
+   "lungLitres": 3.8,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.23,
+    "marks": 17,
+    "otherMarks": 16,
+    "other6to10": 12,
+    "other10to20": 3,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 10,
+    "otherMarks": 10,
+    "other6to10": 2,
+    "other10to20": 5,
+    "other20plus": 3
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.23,
+    "marks": 49,
+    "otherMarks": 48,
+    "other6to10": 35,
+    "other10to20": 9,
+    "other20plus": 4
+   },
+   "ms": 1726
+  },
+  {
+   "case": "RIDER-1867199702_retest",
+   "expertCm3": 1.6,
+   "expertLongMm": 17.5,
+   "lungLitres": 2,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.6,
+    "marks": 20,
+    "otherMarks": 19,
+    "other6to10": 12,
+    "other10to20": 5,
+    "other20plus": 2
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.43,
+    "marks": 11,
+    "otherMarks": 10,
+    "other6to10": 3,
+    "other10to20": 6,
+    "other20plus": 1
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.62,
+    "marks": 49,
+    "otherMarks": 48,
+    "other6to10": 38,
+    "other10to20": 9,
+    "other20plus": 1
+   },
+   "ms": 1188
+  },
+  {
+   "case": "RIDER-1867199702_test",
+   "expertCm3": 1.7,
+   "expertLongMm": 17.2,
+   "lungLitres": 2.1,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.55,
+    "marks": 18,
+    "otherMarks": 17,
+    "other6to10": 10,
+    "other10to20": 6,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.46,
+    "marks": 11,
+    "otherMarks": 10,
+    "other6to10": 5,
+    "other10to20": 4,
+    "other20plus": 1
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.59,
+    "marks": 39,
+    "otherMarks": 38,
+    "other6to10": 26,
+    "other10to20": 11,
+    "other20plus": 1
+   },
+   "ms": 1163
+  },
+  {
+   "case": "RIDER-2016615262_retest",
+   "expertCm3": 29.3,
+   "expertLongMm": 49.8,
+   "lungLitres": 3,
+   "tumourInsideSearchArea": 0.3,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.02,
+    "marks": 22,
+    "otherMarks": 20,
+    "other6to10": 15,
+    "other10to20": 4,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.02,
+    "marks": 21,
+    "otherMarks": 19,
+    "other6to10": 8,
+    "other10to20": 9,
+    "other20plus": 2
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.02,
+    "marks": 120,
+    "otherMarks": 118,
+    "other6to10": 90,
+    "other10to20": 25,
+    "other20plus": 3
+   },
+   "ms": 3036
+  },
+  {
+   "case": "RIDER-2016615262_test",
+   "expertCm3": 27.9,
+   "expertLongMm": 62.8,
+   "lungLitres": 2.8,
+   "tumourInsideSearchArea": 0.32,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.04,
+    "marks": 30,
+    "otherMarks": 27,
+    "other6to10": 17,
+    "other10to20": 6,
+    "other20plus": 4
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.02,
+    "marks": 19,
+    "otherMarks": 17,
+    "other6to10": 8,
+    "other10to20": 8,
+    "other20plus": 1
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.02,
+    "marks": 130,
+    "otherMarks": 125,
+    "other6to10": 98,
+    "other10to20": 23,
+    "other20plus": 4
+   },
+   "ms": 1955
+  },
+  {
+   "case": "RIDER-2073083717_retest",
+   "expertCm3": 5,
+   "expertLongMm": 29.1,
+   "lungLitres": 3.4,
+   "tumourInsideSearchArea": 0.21,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.01,
+    "marks": 8,
+    "otherMarks": 7,
+    "other6to10": 5,
+    "other10to20": 0,
+    "other20plus": 2
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 5,
+    "otherMarks": 5,
+    "other6to10": 0,
+    "other10to20": 4,
+    "other20plus": 1
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.01,
+    "marks": 36,
+    "otherMarks": 35,
+    "other6to10": 29,
+    "other10to20": 5,
+    "other20plus": 1
+   },
+   "ms": 956
+  },
+  {
+   "case": "RIDER-2073083717_test",
+   "expertCm3": 5.9,
+   "expertLongMm": 36.9,
+   "lungLitres": 3.6,
+   "tumourInsideSearchArea": 0.25,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.01,
+    "marks": 7,
+    "otherMarks": 6,
+    "other6to10": 3,
+    "other10to20": 2,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 4,
+    "otherMarks": 4,
+    "other6to10": 1,
+    "other10to20": 2,
+    "other20plus": 1
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 33,
+    "otherMarks": 33,
+    "other6to10": 27,
+    "other10to20": 5,
+    "other20plus": 1
+   },
+   "ms": 1007
+  },
+  {
+   "case": "RIDER-2151469008_retest",
+   "expertCm3": 40.5,
+   "expertLongMm": 53.5,
+   "lungLitres": 3.3,
+   "tumourInsideSearchArea": 0.51,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.05,
+    "marks": 19,
+    "otherMarks": 18,
+    "other6to10": 14,
+    "other10to20": 0,
+    "other20plus": 4
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.18,
+    "marks": 13,
+    "otherMarks": 11,
+    "other6to10": 5,
+    "other10to20": 5,
+    "other20plus": 1
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.08,
+    "marks": 71,
+    "otherMarks": 64,
+    "other6to10": 53,
+    "other10to20": 10,
+    "other20plus": 1
+   },
+   "ms": 1080
+  },
+  {
+   "case": "RIDER-2151469008_test",
+   "expertCm3": 39.5,
+   "expertLongMm": 45.2,
+   "lungLitres": 3.3,
+   "tumourInsideSearchArea": 0.4,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.06,
+    "marks": 12,
+    "otherMarks": 11,
+    "other6to10": 7,
+    "other10to20": 1,
+    "other20plus": 3
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.08,
+    "marks": 13,
+    "otherMarks": 11,
+    "other6to10": 6,
+    "other10to20": 3,
+    "other20plus": 2
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.04,
+    "marks": 60,
+    "otherMarks": 53,
+    "other6to10": 43,
+    "other10to20": 7,
+    "other20plus": 3
+   },
+   "ms": 1150
+  },
+  {
+   "case": "RIDER-2357766186_retest",
+   "expertCm3": 22.7,
+   "expertLongMm": 58.8,
+   "lungLitres": 3.7,
+   "tumourInsideSearchArea": 0.83,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.47,
+    "marks": 28,
+    "otherMarks": 27,
+    "other6to10": 19,
+    "other10to20": 5,
+    "other20plus": 3
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.21,
+    "marks": 17,
+    "otherMarks": 15,
+    "other6to10": 6,
+    "other10to20": 6,
+    "other20plus": 3
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.21,
+    "marks": 102,
+    "otherMarks": 88,
+    "other6to10": 63,
+    "other10to20": 22,
+    "other20plus": 3
+   },
+   "ms": 2077
+  },
+  {
+   "case": "RIDER-2357766186_test",
+   "expertCm3": 21,
+   "expertLongMm": 53.6,
+   "lungLitres": 3.4,
+   "tumourInsideSearchArea": 0.8,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.44,
+    "marks": 18,
+    "otherMarks": 17,
+    "other6to10": 11,
+    "other10to20": 3,
+    "other20plus": 3
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.19,
+    "marks": 17,
+    "otherMarks": 15,
+    "other6to10": 6,
+    "other10to20": 6,
+    "other20plus": 3
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.19,
+    "marks": 80,
+    "otherMarks": 70,
+    "other6to10": 54,
+    "other10to20": 12,
+    "other20plus": 4
+   },
+   "ms": 2734
+  },
+  {
+   "case": "RIDER-2539508879_retest",
+   "expertCm3": 9.1,
+   "expertLongMm": 35.9,
+   "lungLitres": 6.5,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.68,
+    "marks": 9,
+    "otherMarks": 8,
+    "other6to10": 7,
+    "other10to20": 0,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.6,
+    "marks": 8,
+    "otherMarks": 7,
+    "other6to10": 4,
+    "other10to20": 2,
+    "other20plus": 1
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.66,
+    "marks": 62,
+    "otherMarks": 59,
+    "other6to10": 51,
+    "other10to20": 7,
+    "other20plus": 1
+   },
+   "ms": 2352
+  },
+  {
+   "case": "RIDER-2539508879_test",
+   "expertCm3": 8.9,
+   "expertLongMm": 37.6,
+   "lungLitres": 6.3,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.7,
+    "marks": 8,
+    "otherMarks": 7,
+    "other6to10": 6,
+    "other10to20": 1,
+    "other20plus": 0
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.6,
+    "marks": 6,
+    "otherMarks": 5,
+    "other6to10": 3,
+    "other10to20": 1,
+    "other20plus": 1
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.68,
+    "marks": 66,
+    "otherMarks": 63,
+    "other6to10": 51,
+    "other10to20": 11,
+    "other20plus": 1
+   },
+   "ms": 1733
+  },
+  {
+   "case": "RIDER-2655999012_retest",
+   "expertCm3": 2.8,
+   "expertLongMm": 29.1,
+   "lungLitres": 3.3,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.54,
+    "marks": 7,
+    "otherMarks": 6,
+    "other6to10": 5,
+    "other10to20": 0,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.29,
+    "marks": 8,
+    "otherMarks": 7,
+    "other6to10": 1,
+    "other10to20": 2,
+    "other20plus": 4
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.43,
+    "marks": 64,
+    "otherMarks": 63,
+    "other6to10": 44,
+    "other10to20": 14,
+    "other20plus": 5
+   },
+   "ms": 1384
+  },
+  {
+   "case": "RIDER-2655999012_test",
+   "expertCm3": 2.7,
+   "expertLongMm": 30.5,
+   "lungLitres": 3.3,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.6,
+    "marks": 8,
+    "otherMarks": 7,
+    "other6to10": 5,
+    "other10to20": 1,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.33,
+    "marks": 7,
+    "otherMarks": 6,
+    "other6to10": 2,
+    "other10to20": 0,
+    "other20plus": 4
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.46,
+    "marks": 50,
+    "otherMarks": 49,
+    "other6to10": 33,
+    "other10to20": 11,
+    "other20plus": 5
+   },
+   "ms": 1611
+  },
+  {
+   "case": "RIDER-2669524182_retest",
+   "expertCm3": 22.9,
+   "expertLongMm": 41.9,
+   "lungLitres": 4.5,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.52,
+    "marks": 31,
+    "otherMarks": 30,
+    "other6to10": 18,
+    "other10to20": 5,
+    "other20plus": 7
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.25,
+    "marks": 24,
+    "otherMarks": 22,
+    "other6to10": 6,
+    "other10to20": 13,
+    "other20plus": 3
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.1,
+    "marks": 124,
+    "otherMarks": 110,
+    "other6to10": 83,
+    "other10to20": 21,
+    "other20plus": 6
+   },
+   "ms": 2466
+  },
+  {
+   "case": "RIDER-2669524182_test",
+   "expertCm3": 22.1,
+   "expertLongMm": 39.2,
+   "lungLitres": 4.3,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.56,
+    "marks": 35,
+    "otherMarks": 34,
+    "other6to10": 22,
+    "other10to20": 9,
+    "other20plus": 3
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.27,
+    "marks": 27,
+    "otherMarks": 24,
+    "other6to10": 8,
+    "other10to20": 11,
+    "other20plus": 5
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.29,
+    "marks": 115,
+    "otherMarks": 105,
+    "other6to10": 74,
+    "other10to20": 25,
+    "other20plus": 6
+   },
+   "ms": 2672
+  },
+  {
+   "case": "RIDER-2799584460_retest",
+   "expertCm3": 0.8,
+   "expertLongMm": 12.9,
+   "lungLitres": 3.2,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.39,
+    "marks": 48,
+    "otherMarks": 47,
+    "other6to10": 39,
+    "other10to20": 6,
+    "other20plus": 2
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.16,
+    "marks": 17,
+    "otherMarks": 16,
+    "other6to10": 7,
+    "other10to20": 5,
+    "other20plus": 4
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.32,
+    "marks": 124,
+    "otherMarks": 123,
+    "other6to10": 98,
+    "other10to20": 18,
+    "other20plus": 7
+   },
+   "ms": 2103
+  },
+  {
+   "case": "RIDER-2799584460_test",
+   "expertCm3": 0.9,
+   "expertLongMm": 13.3,
+   "lungLitres": 3.2,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.43,
+    "marks": 34,
+    "otherMarks": 33,
+    "other6to10": 24,
+    "other10to20": 7,
+    "other20plus": 2
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.22,
+    "marks": 17,
+    "otherMarks": 16,
+    "other6to10": 9,
+    "other10to20": 5,
+    "other20plus": 2
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.36,
+    "marks": 110,
+    "otherMarks": 109,
+    "other6to10": 79,
+    "other10to20": 23,
+    "other20plus": 7
+   },
+   "ms": 2133
+  },
+  {
+   "case": "RIDER-3152132495_retest",
+   "expertCm3": 146,
+   "expertLongMm": 93.1,
+   "lungLitres": 4.5,
+   "tumourInsideSearchArea": 0.18,
+   "default": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 14,
+    "otherMarks": 14,
+    "other6to10": 11,
+    "other10to20": 2,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.02,
+    "marks": 16,
+    "otherMarks": 15,
+    "other6to10": 5,
+    "other10to20": 6,
+    "other20plus": 4
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.03,
+    "marks": 65,
+    "otherMarks": 64,
+    "other6to10": 48,
+    "other10to20": 12,
+    "other20plus": 4
+   },
+   "ms": 1691
+  },
+  {
+   "case": "RIDER-3152132495_test",
+   "expertCm3": 147,
+   "expertLongMm": 95.3,
+   "lungLitres": 4.5,
+   "tumourInsideSearchArea": 0.18,
+   "default": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 18,
+    "otherMarks": 18,
+    "other6to10": 13,
+    "other10to20": 4,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.02,
+    "marks": 19,
+    "otherMarks": 18,
+    "other6to10": 9,
+    "other10to20": 5,
+    "other20plus": 4
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.03,
+    "marks": 71,
+    "otherMarks": 70,
+    "other6to10": 57,
+    "other10to20": 8,
+    "other20plus": 5
+   },
+   "ms": 1445
+  },
+  {
+   "case": "RIDER-3160137230_retest",
+   "expertCm3": 7.3,
+   "expertLongMm": 30.1,
+   "lungLitres": 3.3,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 29,
+    "otherMarks": 29,
+    "other6to10": 20,
+    "other10to20": 7,
+    "other20plus": 2
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.33,
+    "marks": 13,
+    "otherMarks": 12,
+    "other6to10": 5,
+    "other10to20": 5,
+    "other20plus": 2
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.37,
+    "marks": 53,
+    "otherMarks": 49,
+    "other6to10": 35,
+    "other10to20": 11,
+    "other20plus": 3
+   },
+   "ms": 1806
+  },
+  {
+   "case": "RIDER-3160137230_test",
+   "expertCm3": 6.8,
+   "expertLongMm": 27.6,
+   "lungLitres": 3.2,
+   "tumourInsideSearchArea": 1,
+   "default": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 27,
+    "otherMarks": 27,
+    "other6to10": 20,
+    "other10to20": 6,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.36,
+    "marks": 11,
+    "otherMarks": 10,
+    "other6to10": 5,
+    "other10to20": 3,
+    "other20plus": 2
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.43,
+    "marks": 45,
+    "otherMarks": 42,
+    "other6to10": 32,
+    "other10to20": 8,
+    "other20plus": 2
+   },
+   "ms": 1515
+  },
+  {
+   "case": "RIDER-5195703382_test",
+   "expertCm3": 36.2,
+   "expertLongMm": 58.2,
+   "lungLitres": 3.7,
+   "tumourInsideSearchArea": 0.85,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.57,
+    "marks": 20,
+    "otherMarks": 18,
+    "other6to10": 14,
+    "other10to20": 4,
+    "other20plus": 0
+   },
+   "strict": {
+    "found": true,
+    "tumourCovered": 0.43,
+    "marks": 16,
+    "otherMarks": 14,
+    "other6to10": 5,
+    "other10to20": 7,
+    "other20plus": 2
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.46,
+    "marks": 80,
+    "otherMarks": 73,
+    "other6to10": 57,
+    "other10to20": 14,
+    "other20plus": 2
+   },
+   "ms": 2233
+  },
+  {
+   "case": "RIDER-6324870494_retest",
+   "expertCm3": 9.4,
+   "expertLongMm": 31.7,
+   "lungLitres": 5,
+   "tumourInsideSearchArea": 0.44,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.04,
+    "marks": 24,
+    "otherMarks": 22,
+    "other6to10": 19,
+    "other10to20": 2,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 6,
+    "otherMarks": 6,
+    "other6to10": 4,
+    "other10to20": 1,
+    "other20plus": 1
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.04,
+    "marks": 47,
+    "otherMarks": 45,
+    "other6to10": 37,
+    "other10to20": 7,
+    "other20plus": 1
+   },
+   "ms": 1751
+  },
+  {
+   "case": "RIDER-6324870494_test",
+   "expertCm3": 7.6,
+   "expertLongMm": 30.1,
+   "lungLitres": 5,
+   "tumourInsideSearchArea": 0.46,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.08,
+    "marks": 20,
+    "otherMarks": 18,
+    "other6to10": 15,
+    "other10to20": 2,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.02,
+    "marks": 10,
+    "otherMarks": 9,
+    "other6to10": 5,
+    "other10to20": 3,
+    "other20plus": 1
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.04,
+    "marks": 56,
+    "otherMarks": 54,
+    "other6to10": 45,
+    "other10to20": 8,
+    "other20plus": 1
+   },
+   "ms": 1891
+  },
+  {
+   "case": "RIDER-8509201188_test",
+   "expertCm3": 140.5,
+   "expertLongMm": 84.6,
+   "lungLitres": 6.5,
+   "tumourInsideSearchArea": 0.24,
+   "default": {
+    "found": false,
+    "tumourCovered": 0.01,
+    "marks": 22,
+    "otherMarks": 21,
+    "other6to10": 15,
+    "other10to20": 3,
+    "other20plus": 3
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0.06,
+    "marks": 17,
+    "otherMarks": 16,
+    "other6to10": 6,
+    "other10to20": 8,
+    "other20plus": 2
+   },
+   "combined": {
+    "found": false,
+    "tumourCovered": 0.07,
+    "marks": 91,
+    "otherMarks": 89,
+    "other6to10": 72,
+    "other10to20": 15,
+    "other20plus": 2
+   },
+   "ms": 2297
+  },
+  {
+   "case": "RIDER-9763310455_retest",
+   "expertCm3": 1,
+   "expertLongMm": 15.9,
+   "lungLitres": 2.8,
+   "tumourInsideSearchArea": 0.61,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.23,
+    "marks": 13,
+    "otherMarks": 12,
+    "other6to10": 9,
+    "other10to20": 2,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 13,
+    "otherMarks": 13,
+    "other6to10": 5,
+    "other10to20": 6,
+    "other20plus": 2
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.23,
+    "marks": 65,
+    "otherMarks": 64,
+    "other6to10": 51,
+    "other10to20": 10,
+    "other20plus": 3
+   },
+   "ms": 5531
+  },
+  {
+   "case": "RIDER-9763310455_test",
+   "expertCm3": 1,
+   "expertLongMm": 17,
+   "lungLitres": 2.8,
+   "tumourInsideSearchArea": 0.59,
+   "default": {
+    "found": true,
+    "tumourCovered": 0.2,
+    "marks": 13,
+    "otherMarks": 12,
+    "other6to10": 10,
+    "other10to20": 1,
+    "other20plus": 1
+   },
+   "strict": {
+    "found": false,
+    "tumourCovered": 0,
+    "marks": 15,
+    "otherMarks": 15,
+    "other6to10": 8,
+    "other10to20": 4,
+    "other20plus": 3
+   },
+   "combined": {
+    "found": true,
+    "tumourCovered": 0.2,
+    "marks": 93,
+    "otherMarks": 92,
+    "other6to10": 79,
+    "other10to20": 11,
+    "other20plus": 2
+   },
+   "ms": 3036
+  }
+ ]
+}
