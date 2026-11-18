@@ -58,18 +58,49 @@ scan is not good enough for growth tracking, and the tool should not be used tha
 Same-day pairs are the easy case for matching: same position, minutes apart. Real follow-ups are
 months apart, with a changed tumour. This data cannot test that.
 
-## 3. Against the goals
+## 3. Time saved: how it was measured
+
+**It was not measured with the lab.** Daniel could not run the tool (the lab cannot open links), and
+timing myself would say nothing about a trained reader. What follows is an estimate built from
+Daniel's own figures for each step of his work, with every assumption visible. It should be replaced
+by a timed session as soon as one is possible.
+
+| Step | Today (Daniel's figures) | With the tool | Basis for the tool column |
+|---|---|---|---|
+| Find the nodules (scroll the scan twice) | 10-20 min | 10-20 min | Not addressed. Automatic finding was not built. |
+| Measure diameters | 2-4 min per nodule | about 1 min | One line, then check. Assumption. |
+| Record in the sheet | 3-5 min | about 1 min | Export fills the row; lobe and type are still entered. |
+| Match to the prior scan (follow-ups) | about 10 min | about 2 min | 19 of 19 tumours found on the test pairs; Daniel still reviews each one. Assumption for the review time. |
+| Full volume outline (1 tumour in 5) | 15-25 min | 3-8 min | Assumption. Daniel's words after seeing the model: "just tweaking edges rather than redrawing them". |
+
+For a scan with one tumour:
+
+| Scan | Today | Estimated saving | Share |
+|---|---|---|---|
+| New scan, diameters only | 25-40 min | 3-7 min | 10-20% |
+| Follow-up scan, diameters only | 35-50 min | 11-15 min | about 30% |
+| Either, when a full volume is outlined | add 15-25 min | add 7-22 min | |
+
+Over the roughly 390 scans left in the backlog this is in the order of 85 to 105 hours if most are
+follow-ups. The mix of new and follow-up scans is not known.
+
+**The goal of halving Daniel's time is not shown, and by this estimate it is not reached.** Finding
+the nodules is the largest single step and the tool does not touch it. My first rough estimate to the
+lab (about 40% on a new scan, half on a follow-up) was too high: it assumed a quick sign-off on
+follow-ups, and Daniel then said he will review and adjust every carried-over outline.
+
+## 4. Against the goals
 
 | Goal | Status |
 |---|---|
-| Halve Daniel's time per scan | **Not measured.** Daniel has not been able to run the tool (no links from the lab), and my own timing would not be his. What is known: the outline and the sheet row take seconds; correction time on hard cases is unknown. |
+| Halve Daniel's time per scan | **Not shown.** Estimated at 10-20% on a new scan and about 30% on a follow-up, more when a volume is outlined. Not measured with a reader. |
 | Do not harm volume growth tracking | Supported for carried-over outlines on same-day pairs (5.8% vs 5.2%). Not shown for real follow-ups. |
 | Runs in the browser, nothing uploaded, no cost | Met, including the image model. |
 | Daniel sees, edits and signs off every outline | Met. Unsigned outlines are never exported. |
 | Export in the lab's sheet format | Met; confirmed by Daniel. |
 | Find nodules automatically | Not built. See limits. |
 
-## 4. Limits
+## 5. Limits
 
 - 31 patients, one public dataset, one scanner protocol (1.25 mm slices). All tumours are large
   (13 to 95 mm). **No small or ground-glass nodules**, which Daniel named as his hardest cases.
@@ -79,11 +110,12 @@ months apart, with a changed tumour. This data cannot test that.
 - No timing with a real reader. This is the main open question for the pilot.
 - Not a medical device. Research measurements only.
 
-## 5. What I would do next
+## 6. What I would do next
 
 1. A timed session with Daniel on ten scans, tool against his usual method, including two chest
-   wall cases. This is the measurement that decides whether the goal is met.
-2. A public nodule set with several readers (for example LIDC-IDRI) to cover small and ground-glass
+   wall cases. Daniel and Naomi have both agreed to it. It needs a way for the tool to reach the
+   lab's workstation, since links cannot be opened there.
+2. Automatic finding of nodules, the largest remaining step, tested on a public nodule set with several readers (for example LIDC-IDRI) to cover small and ground-glass
    nodules, reported by size and type as Daniel asked.
 3. Real follow-up pairs, months apart.
 4. A 3D model (MedSAM2) to remove the need for boxes, if it can run on the lab's workstation.
